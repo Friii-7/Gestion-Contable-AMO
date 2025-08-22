@@ -132,51 +132,7 @@ export class TablaGestionContableComponent {
   private cargarDatosIniciales(): void {
     this._isLoading.set(true);
 
-    // Simular carga de datos
-    setTimeout(() => {
-      const datosEjemplo: RegistroContable[] = [
-        {
-          id: '1',
-          fechaRegistro: new Date('2024-01-15'),
-          valorVentas: 1500000,
-          observacionVenta: 'Venta de productos varios',
-          metodoPago: 'transferencia',
-          gastos: 300000,
-          observacionGasto: 'Gastos operativos del día',
-          pagoDiaCarlos: true,
-          total: 1200000,
-          estado: 'activo'
-        },
-        {
-          id: '2',
-          fechaRegistro: new Date('2024-01-16'),
-          valorVentas: 2200000,
-          observacionVenta: 'Venta mayorista',
-          metodoPago: 'efectivo',
-          gastos: 450000,
-          observacionGasto: 'Gastos de transporte y logística',
-          pagoDiaCarlos: true,
-          total: 1750000,
-          estado: 'activo'
-        },
-        {
-          id: '3',
-          fechaRegistro: new Date('2024-01-17'),
-          valorVentas: 1800000,
-          observacionVenta: 'Venta minorista',
-          metodoPago: 'tarjeta-credito',
-          gastos: 280000,
-          observacionGasto: 'Gastos administrativos',
-          pagoDiaCarlos: false,
-          total: 1520000,
-          estado: 'activo'
-        }
-      ];
 
-      this._registros.set(datosEjemplo);
-      this.aplicarFiltros();
-      this._isLoading.set(false);
-    }, 1000);
   }
 
   // Aplicar filtros a los registros

@@ -1,10 +1,12 @@
-import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Firestore, collection, addDoc } from '@angular/fire/firestore';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -15,13 +17,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 interface GestionContable {
+  id?: string;
   fechaRegistro: Date;
   valorVentas: number;
   observacionVenta: string;
   metodoPago: string;
-  gastos: number;
+  gastos: number; // gastos operativos (NO incluye pago de Carlos)
   observacionGasto: string;
   pagoDiaCarlos: boolean;
+  total: number;
+  estado: string;
+  fechaCreacion?: Date;
+  fechaActualizacion?: Date;
 }
 
 @Component({
@@ -33,7 +40,6 @@ interface GestionContable {
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatCheckboxModule,
@@ -41,135 +47,185 @@ interface GestionContable {
     MatCardModule,
     MatDividerModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gestion-contable.component.html',
-  styleUrls: ['./gestion-contable.component.css']
+  styleUrls: ['./gestion-contable.component.css'],
 })
 export class GestionContableComponent {
-  // Signals para el estado del componente
+  private readonly firestore = inject(Firestore);
+  private readonly ngZone = inject(NgZone);
+  private readonly snackBar = inject(MatSnackBar);
+
+  // Constantes
+  readonly PAGO_DIARIO_CARLOS = 60_000;
+
+  // Estado (signals)
   private readonly _isSubmitting = signal(false);
   private readonly _formData = signal<GestionContable | null>(null);
 
-  // Computed values
   readonly isSubmitting = this._isSubmitting.asReadonly();
   readonly formData = this._formData.asReadonly();
-  readonly isFormValid = computed(() => this.formulario.valid && !this._isSubmitting());
 
-  // Formulario reactivo
-  formulario: FormGroup;
+  // Formulario
+  readonly form: FormGroup;
 
-  // Constante para el pago diario a Carlos
-  readonly PAGO_DIARIO_CARLOS = 60000;
-
-  // Opciones para el selector de método de pago
-  readonly metodosPago = [
-    { value: 'transferencia', label: 'Transferencia' },
-    { value: 'efectivo', label: 'Efectivo' },
-    { value: 'tarjeta-credito', label: 'Tarjeta de Crédito' },
-    { value: 'debito', label: 'Débito' }
-  ];
+  // Habilitar botón Guardar cuando el form es válido y no está enviando
+  readonly isFormValid = computed(() => this.form.valid && !this._isSubmitting());
 
   constructor(private fb: FormBuilder) {
-    this.formulario = this.fb.group({
+    this.form = this.fb.group({
       fechaRegistro: [new Date(), [Validators.required]],
-      valorVentas: ['', [Validators.required, Validators.min(0)]],
+      valorVentas: [null, [Validators.required, Validators.min(0)]],
       observacionVenta: ['', [Validators.required, Validators.minLength(10)]],
-      metodoPago: ['', [Validators.required]],
-      gastos: ['', [Validators.required, Validators.min(0)]],
+      gastos: [null, [Validators.required, Validators.min(0)]],
       observacionGasto: ['', [Validators.required, Validators.minLength(10)]],
-      pagoDiaCarlos: [false]
-    });
-
-    // Suscribirse a cambios en el checkbox para actualizar gastos automáticamente
-    this.formulario.get('pagoDiaCarlos')?.valueChanges.subscribe(checked => {
-      if (checked) {
-        this.actualizarGastosConPagoCarlos();
-      }
+      pagoDiaCarlos: [false],
     });
   }
 
-  // Método para actualizar gastos incluyendo el pago a Carlos
-  private actualizarGastosConPagoCarlos(): void {
-    const gastosActuales = this.formulario.get('gastos')?.value || 0;
-    const gastosSinCarlos = gastosActuales - this.PAGO_DIARIO_CARLOS;
+  // --- Cálculos ---
+  getGastosSinCarlos(): number {
+    return Number(this.form.get('gastos')?.value) || 0;
+  }
 
-    if (gastosSinCarlos < 0) {
-      // Si no hay suficientes gastos, establecer solo el pago a Carlos
-      this.formulario.patchValue({
-        gastos: this.PAGO_DIARIO_CARLOS,
-        observacionGasto: 'Pago del día a Carlos - $60,000'
+  private getPagoCarlosActual(): number {
+    return this.form.get('pagoDiaCarlos')?.value ? this.PAGO_DIARIO_CARLOS : 0;
+  }
+
+  getTotal(): number {
+    const ventas = Number(this.form.get('valorVentas')?.value) || 0;
+    const gastos = this.getGastosSinCarlos() + this.getPagoCarlosActual();
+    return ventas - gastos;
+  }
+
+  // --- UI helpers ---
+  hasError(field: string): boolean {
+    const ctrl = this.form.get(field);
+    return !!(ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched));
+  }
+
+  getErrorMessage(field: string): string {
+    const ctrl = this.form.get(field);
+    if (!ctrl || !ctrl.errors) return '';
+    if (ctrl.errors['required']) return 'Este campo es requerido';
+    if (ctrl.errors['min']) return `El valor mínimo es ${ctrl.errors['min'].min}`;
+    if (ctrl.errors['minlength']) return `Mínimo ${ctrl.errors['minlength'].requiredLength} caracteres`;
+    return 'Campo inválido';
+  }
+
+  // --- Acciones ---
+  async onSubmit(): Promise<void> {
+    if (this.form.invalid) return;
+
+    this._isSubmitting.set(true);
+
+    try {
+      // Crear el payload para Firebase
+      const payload: Omit<GestionContable, 'id' | 'fechaCreacion' | 'fechaActualizacion'> = {
+        fechaRegistro: this.form.get('fechaRegistro')?.value,
+        valorVentas: Number(this.form.get('valorVentas')?.value) || 0,
+        observacionVenta: this.form.get('observacionVenta')?.value,
+        metodoPago: 'efectivo', // Por defecto, se puede cambiar después
+        gastos: Number(this.form.get('gastos')?.value) || 0,
+        observacionGasto: this.form.get('observacionGasto')?.value,
+        pagoDiaCarlos: this.form.get('pagoDiaCarlos')?.value,
+        total: this.getTotal(),
+        estado: 'activo'
+      };
+
+      // Guardar en Firebase usando Angular Fire
+      let docRef: any;
+      await this.ngZone.runOutsideAngular(async () => {
+        docRef = await addDoc(collection(this.firestore, 'gestion-contable'), payload);
       });
-    } else {
-      // Agregar el pago a Carlos a los gastos existentes
-      this.formulario.patchValue({
-        gastos: gastosSinCarlos + this.PAGO_DIARIO_CARLOS
+
+      // Mostrar mensaje de éxito
+      this.snackBar.open(`Registro guardado exitosamente con ID: ${docRef.id}`, 'Cerrar', {
+        duration: 5000
       });
+
+      // Actualizar el estado local
+      this._formData.set({
+        ...payload,
+        id: docRef.id,
+        fechaCreacion: new Date(),
+        fechaActualizacion: new Date()
+      });
+
+      // Reset elegante
+      this.form.reset({
+        fechaRegistro: new Date(),
+        valorVentas: null,
+        observacionVenta: '',
+        gastos: null,
+        observacionGasto: '',
+        pagoDiaCarlos: false,
+      });
+
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      this.snackBar.open('Error al guardar el registro. Inténtalo de nuevo.', 'Cerrar', {
+        duration: 5000
+      });
+    } finally {
+      this._isSubmitting.set(false);
     }
   }
 
-  // Método para enviar el formulario
-  onSubmit(): void {
-    if (this.formulario.valid) {
-      this._isSubmitting.set(true);
-
-      // Simular envío de datos
-      setTimeout(() => {
-        const formValue = this.formulario.value;
-        this._formData.set(formValue);
-        this._isSubmitting.set(false);
-
-        // Resetear formulario después del envío exitoso
-        this.formulario.reset();
-        this.formulario.patchValue({
-          fechaRegistro: new Date(),
-          pagoDiaCarlos: false
-        });
-
-        console.log('Datos enviados:', formValue);
-      }, 1000);
-    }
-  }
-
-  // Método para limpiar el formulario
   limpiarFormulario(): void {
-    this.formulario.reset();
-    this.formulario.patchValue({
+    this.form.reset({
       fechaRegistro: new Date(),
-      pagoDiaCarlos: false
+      valorVentas: null,
+      observacionVenta: '',
+      gastos: null,
+      observacionGasto: '',
+      pagoDiaCarlos: false,
     });
     this._formData.set(null);
   }
 
-  // Método para obtener el total (ventas - gastos)
-  getTotal(): number {
-    const ventas = this.formulario.get('valorVentas')?.value || 0;
-    const gastos = this.formulario.get('gastos')?.value || 0;
-    return ventas - gastos;
-  }
+  // Método para probar conexión a Firebase
+  async testFirebaseConnection(): Promise<void> {
+    try {
+      // Crear un documento de prueba temporal
+      const testDoc = { test: true, timestamp: new Date() };
+      const docRef = await addDoc(collection(this.firestore, 'test-connection'), testDoc);
 
-  // Método para obtener el total de gastos sin incluir el pago a Carlos
-  getGastosSinCarlos(): number {
-    const gastos = this.formulario.get('gastos')?.value || 0;
-    const pagoCarlos = this.formulario.get('pagoDiaCarlos')?.value ? this.PAGO_DIARIO_CARLOS : 0;
-    return gastos - pagoCarlos;
-  }
+      // Eliminar el documento de prueba
+      // await deleteDoc(doc(this.firestore, 'test-connection', docRef.id));
 
-  // Método para validar si el campo tiene errores
-  hasError(fieldName: string): boolean {
-    const field = this.formulario.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
-  }
-
-  // Método para obtener el mensaje de error
-  getErrorMessage(fieldName: string): string {
-    const field = this.formulario.get(fieldName);
-    if (field?.errors) {
-      if (field.errors['required']) return 'Este campo es requerido';
-      if (field.errors['min']) return `El valor mínimo es ${field.errors['min'].min}`;
-      if (field.errors['minlength']) return `Mínimo ${field.errors['minlength'].requiredLength} caracteres`;
+      this.snackBar.open('✅ Conexión a Firebase exitosa', 'Cerrar', {
+        duration: 5000
+      });
+    } catch (error) {
+      console.error('Error al probar conexión:', error);
+      this.snackBar.open('❌ Error en conexión a Firebase', 'Cerrar', {
+        duration: 5000
+      });
     }
-    return '';
+  }
+
+  // Método para verificar configuración del proyecto
+  async checkProjectConfiguration(): Promise<void> {
+    try {
+      // Verificar que Firestore esté disponible
+      if (this.firestore) {
+        this.snackBar.open('✅ Firestore configurado correctamente. Revisa la consola.', 'Cerrar', {
+          duration: 5000
+        });
+        console.log('Firestore instance:', this.firestore);
+      } else {
+        this.snackBar.open('❌ Firestore no está configurado', 'Cerrar', {
+          duration: 5000
+        });
+      }
+    } catch (error) {
+      console.error('Error al verificar configuración:', error);
+      this.snackBar.open('❌ Error al verificar configuración del proyecto', 'Cerrar', {
+        duration: 5000
+      });
+    }
   }
 }

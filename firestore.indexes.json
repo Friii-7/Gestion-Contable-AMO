@@ -1,0 +1,33 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "registros_contables",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "estado",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaRegistro",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "registros_contables",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "metodoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaRegistro",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
