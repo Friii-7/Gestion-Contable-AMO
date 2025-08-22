@@ -1,0 +1,233 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10 col-xl-8">
+      <!-- Header del formulario -->
+      <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold text-primary">
+          <mat-icon class="me-3">account_balance</mat-icon>
+          Gestión Contable AMO
+        </h1>
+        <p class="lead text-muted">Sistema de control y registro de operaciones contables</p>
+
+        <!-- Navegación entre componentes -->
+        <div class="mt-3">
+          <a routerLink="/tabla-gestion-contable" class="btn btn-outline-primary me-2">
+            <mat-icon>table_chart</mat-icon>
+            Ver Tabla de Registros
+          </a>
+        </div>
+      </div>
+
+      <!-- Formulario principal -->
+      <mat-card class="shadow-lg border-0">
+        <mat-card-header class="bg-primary text-white">
+          <mat-card-title>
+            <mat-icon class="me-2">receipt_long</mat-icon>
+            Registro de Operación Contable
+          </mat-card-title>
+          <mat-card-subtitle class="text-white-50">
+            Complete todos los campos para registrar la operación
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="p-4">
+          <form [formGroup]="formulario" (ngSubmit)="onSubmit()" class="row g-4">
+
+            <!-- Fecha de Registro -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Fecha de Registro</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="fechaRegistro"
+                       placeholder="Seleccione fecha" required>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                                 @if (hasError('fechaRegistro')) {
+                   <mat-error>
+                     {{ getErrorMessage('fechaRegistro') }}
+                   </mat-error>
+                 }
+              </mat-form-field>
+            </div>
+
+            <!-- Valor de Ventas -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Valor de Ventas</mat-label>
+                <input matInput type="number" formControlName="valorVentas"
+                       placeholder="0.00" required>
+                <mat-icon matSuffix class="text-success">attach_money</mat-icon>
+                                 @if (hasError('valorVentas')) {
+                   <mat-error>
+                     {{ getErrorMessage('valorVentas') }}
+                   </mat-error>
+                 }
+              </mat-form-field>
+            </div>
+
+            <!-- Observación de Venta -->
+            <div class="col-12">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Observación de Venta</mat-label>
+                <textarea matInput formControlName="observacionVenta"
+                          placeholder="Describa qué vendió..." rows="3" required></textarea>
+                <mat-icon matSuffix class="text-info">description</mat-icon>
+                                 @if (hasError('observacionVenta')) {
+                   <mat-error>
+                     {{ getErrorMessage('observacionVenta') }}
+                   </mat-error>
+                 }
+              </mat-form-field>
+            </div>
+
+            <!-- Método de Pago -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Método de Pago</mat-label>
+                <mat-select formControlName="metodoPago" required>
+                                     @for (metodo of metodosPago; track metodo.value) {
+                     <mat-option [value]="metodo.value">
+                       <mat-icon class="me-2">
+                         {{ metodo.value === 'transferencia' ? 'account_balance' :
+                            metodo.value === 'efectivo' ? 'money' :
+                            metodo.value === 'tarjeta-credito' ? 'credit_card' : 'credit_card' }}
+                       </mat-icon>
+                       {{ metodo.label }}
+                     </mat-option>
+                   }
+                </mat-select>
+                                 @if (hasError('metodoPago')) {
+                   <mat-error>
+                     {{ getErrorMessage('metodoPago') }}
+                   </mat-error>
+                 }
+              </mat-form-field>
+            </div>
+
+            <!-- Gastos -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Gastos</mat-label>
+                <input matInput type="number" formControlName="gastos"
+                       placeholder="0.00" required>
+                <mat-icon matSuffix class="text-danger">money_off</mat-icon>
+                                 @if (hasError('gastos')) {
+                   <mat-error>
+                     {{ getErrorMessage('gastos') }}
+                   </mat-error>
+                 }
+              </mat-form-field>
+            </div>
+
+            <!-- Observación de Gasto -->
+            <div class="col-12">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Observación de Gasto</mat-label>
+                <textarea matInput formControlName="observacionGasto"
+                          placeholder="Describa en qué gastó..." rows="3" required></textarea>
+                <mat-icon matSuffix class="text-warning">receipt</mat-icon>
+                                 @if (hasError('observacionGasto')) {
+                   <mat-error>
+                     {{ getErrorMessage('observacionGasto') }}
+                   </mat-error>
+                 }
+              </mat-form-field>
+            </div>
+
+            <!-- Pago del día a Carlos -->
+            <div class="col-12">
+              <mat-checkbox formControlName="pagoDiaCarlos" class="d-flex align-items-center">
+                <mat-icon class="me-2 text-primary">person</mat-icon>
+                <span class="ms-2">Pago del día a Carlos - ${{ PAGO_DIARIO_CARLOS.toLocaleString() }}</span>
+              </mat-checkbox>
+              <small class="text-muted d-block mt-1">
+                Al marcar esta opción, se agregarán automáticamente ${{ PAGO_DIARIO_CARLOS.toLocaleString() }} a los gastos
+              </small>
+            </div>
+
+            <!-- Resumen de la operación -->
+            <div class="col-12">
+              <mat-divider class="my-3"></mat-divider>
+              <div class="row text-center">
+                <div class="col-md-3">
+                  <div class="card bg-light border-0">
+                    <div class="card-body">
+                      <h6 class="card-title text-muted">Ventas</h6>
+                      <h4 class="text-success mb-0">
+                        ${{ formulario.get('valorVentas')?.value || '0.00' }}
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-light border-0">
+                    <div class="card-body">
+                      <h6 class="card-title text-muted">Gastos Operativos</h6>
+                      <h4 class="text-warning mb-0">
+                        ${{ getGastosSinCarlos().toLocaleString() }}
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-info text-white border-0">
+                    <div class="card-body">
+                      <h6 class="card-title">Pago Carlos</h6>
+                      <h4 class="mb-0">${{ (formulario.get('pagoDiaCarlos')?.value ? PAGO_DIARIO_CARLOS : 0).toLocaleString() }}</h4>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-primary text-white border-0">
+                    <div class="card-body">
+                      <h6 class="card-title">Total</h6>
+                      <h4 class="mb-0">${{ getTotal().toLocaleString() }}</h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="col-12 text-center mt-4">
+              <div class="d-flex gap-3 justify-content-center flex-wrap">
+                                 <button mat-raised-button color="primary" type="submit"
+                         [disabled]="!isFormValid()" class="px-4 py-2">
+                   @if (!isSubmitting()) {
+                     <mat-icon class="me-2">save</mat-icon>
+                   }
+                   @if (isSubmitting()) {
+                     <mat-spinner diameter="20"></mat-spinner>
+                   }
+                   {{ isSubmitting() ? 'Enviando...' : 'Guardar Registro' }}
+                 </button>
+
+                <button mat-stroked-button type="button"
+                        (click)="limpiarFormulario()" class="px-4 py-2">
+                  <mat-icon class="me-2">clear</mat-icon>
+                  Limpiar Formulario
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+             <!-- Mensaje de confirmación -->
+       @if (formData()) {
+         <div class="mt-4">
+           <mat-card class="bg-success text-white border-0">
+             <mat-card-content class="p-3">
+               <div class="d-flex align-items-center">
+                 <mat-icon class="me-3">check_circle</mat-icon>
+                 <div>
+                   <h6 class="mb-1">¡Registro Exitoso!</h6>
+                   <p class="mb-0">Los datos han sido guardados correctamente.</p>
+                 </div>
+               </div>
+             </mat-card-content>
+           </mat-card>
+         </div>
+       }
+    </div>
+  </div>
+</div>

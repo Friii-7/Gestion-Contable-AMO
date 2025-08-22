@@ -1,0 +1,256 @@
+<div class="tabla-gestion-contable">
+  <!-- Header con título y botones de reporte -->
+  <mat-card class="header-card">
+    <div class="header-content">
+      <div class="title-section">
+        <h2>Tabla de Gestión Contable</h2>
+        <p class="subtitle">Gestiona y visualiza todos los registros contables</p>
+
+        <!-- Navegación de regreso -->
+        <div class="mt-2">
+          <a routerLink="/gestion-contable" class="nav-link-back">
+            <mat-icon>arrow_back</mat-icon>
+            Volver al Formulario
+          </a>
+        </div>
+      </div>
+
+      <div class="actions-section">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="generarReporteExcel()"
+          [disabled]="isLoading()"
+          class="report-button">
+          <mat-icon>table_chart</mat-icon>
+          Reporte Excel
+        </button>
+
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="generarReportePDF()"
+          [disabled]="isLoading()"
+          class="report-button">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Reporte PDF
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Filtros -->
+  <mat-card class="filtros-card">
+    <mat-card-header>
+      <mat-card-title>Filtros de Búsqueda</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="filtrosForm" class="filtros-form">
+        <div class="filtros-row">
+          <mat-form-field appearance="outline" class="filtro-field">
+            <mat-label>Fecha Desde</mat-label>
+            <input
+              matInput
+              type="date"
+              formControlName="fechaDesde"
+              placeholder="Seleccionar fecha">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field">
+            <mat-label>Fecha Hasta</mat-label>
+            <input
+              matInput
+              type="date"
+              formControlName="fechaHasta"
+              placeholder="Seleccionar fecha">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field">
+            <mat-label>Método de Pago</mat-label>
+            <mat-select formControlName="metodoPago">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="transferencia">Transferencia</mat-option>
+              <mat-option value="efectivo">Efectivo</mat-option>
+              <mat-option value="tarjeta-credito">Tarjeta de Crédito</mat-option>
+              <mat-option value="debito">Débito</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filtro-field">
+            <mat-label>Estado</mat-label>
+            <mat-select formControlName="estado">
+              <mat-option value="activo">Activo</mat-option>
+              <mat-option value="eliminado">Eliminado</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="filtros-actions">
+          <button
+            mat-button
+            color="warn"
+            (click)="limpiarFiltros()"
+            type="button">
+            <mat-icon>clear</mat-icon>
+            Limpiar Filtros
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Resumen de totales -->
+  <mat-card class="resumen-card">
+    <div class="resumen-content">
+      <div class="resumen-item">
+        <span class="resumen-label">Total Registros:</span>
+        <span class="resumen-value">{{ totalRegistros() }}</span>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">Total Ventas:</span>
+        <span class="resumen-value ventas">{{ formatearMoneda(totalVentas()) }}</span>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">Total Gastos:</span>
+        <span class="resumen-value gastos">{{ formatearMoneda(totalGastos()) }}</span>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">Total Neto:</span>
+        <span class="resumen-value neto" [class.positivo]="totalNeto() >= 0" [class.negativo]="totalNeto() < 0">
+          {{ formatearMoneda(totalNeto()) }}
+        </span>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Tabla de registros -->
+  <mat-card class="tabla-card">
+    <mat-card-content>
+      @if (isLoading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando registros...</p>
+        </div>
+      } @else if (registrosFiltrados().length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">inbox</mat-icon>
+          <h3>No hay registros para mostrar</h3>
+          <p>Ajusta los filtros o agrega nuevos registros</p>
+        </div>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="registrosFiltrados()" class="data-table">
+
+            <!-- Columna Fecha -->
+            <ng-container matColumnDef="fechaRegistro">
+              <th mat-header-cell *matHeaderCellDef>Fecha</th>
+              <td mat-cell *matCellDef="let registro">
+                {{ formatearFecha(registro.fechaRegistro) }}
+              </td>
+            </ng-container>
+
+            <!-- Columna Valor Ventas -->
+            <ng-container matColumnDef="valorVentas">
+              <th mat-header-cell *matHeaderCellDef>Ventas</th>
+              <td mat-cell *matCellDef="let registro">
+                <span class="valor-ventas">{{ formatearMoneda(registro.valorVentas) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Método de Pago -->
+            <ng-container matColumnDef="metodoPago">
+              <th mat-header-cell *matHeaderCellDef>Método Pago</th>
+              <td mat-cell *matCellDef="let registro">
+                <div class="metodo-pago">
+                  <mat-icon class="metodo-icon">{{ getMetodoPagoIcon(registro.metodoPago) }}</mat-icon>
+                  <span>{{ getMetodoPagoText(registro.metodoPago) }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Columna Gastos -->
+            <ng-container matColumnDef="gastos">
+              <th mat-header-cell *matHeaderCellDef>Gastos</th>
+              <td mat-cell *matCellDef="let registro">
+                <span class="valor-gastos">{{ formatearMoneda(registro.gastos) }}</span>
+                @if (registro.pagoDiaCarlos) {
+                  <mat-chip class="pago-carlos-chip" color="primary" selected>
+                    <mat-icon>person</mat-icon>
+                    Carlos
+                  </mat-chip>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Columna Total -->
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let registro">
+                <span class="valor-total" [class.positivo]="registro.total >= 0" [class.negativo]="registro.total < 0">
+                  {{ formatearMoneda(registro.total) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let registro">
+                <mat-chip
+                  [class]="getEstadoClass(registro.estado)"
+                  [color]="registro.estado === 'activo' ? 'primary' : 'warn'"
+                  selected>
+                  {{ getEstadoText(registro.estado) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Columna Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let registro">
+                <div class="acciones-container">
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    (click)="observarRegistro(registro)"
+                    matTooltip="Ver detalles"
+                    class="accion-btn">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    color="accent"
+                    (click)="editarRegistro(registro)"
+                    matTooltip="Editar registro"
+                    class="accion-btn"
+                    [disabled]="registro.estado === 'eliminado'">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    (click)="eliminarRegistro(registro)"
+                    matTooltip="Eliminar registro"
+                    class="accion-btn"
+                    [disabled]="registro.estado === 'eliminado'">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
