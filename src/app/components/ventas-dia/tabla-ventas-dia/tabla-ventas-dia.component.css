@@ -1,0 +1,164 @@
+/* Estilos para la tabla de ventas del día */
+
+.container-fluid {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Header */
+.display-6 {
+  color: #198754 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Tarjetas de resumen */
+.bg-primary {
+  background-color: #0d6efd !important;
+}
+
+.bg-success {
+  background-color: #198754 !important;
+}
+
+.bg-warning {
+  background-color: #ffc107 !important;
+}
+
+/* Tabla */
+.mat-mdc-table {
+  width: 100%;
+  background: white;
+}
+
+.mat-mdc-header-cell {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.mat-mdc-cell {
+  padding: 16px 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.mat-mdc-row:hover {
+  background-color: #f8f9fa;
+}
+
+/* Botones de acción */
+.mat-mdc-icon-button {
+  transition: all 0.2s ease;
+}
+
+.mat-mdc-icon-button:hover {
+  transform: scale(1.1);
+}
+
+/* Formulario de edición */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .col-xl-10 {
+    max-width: 100%;
+  }
+
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+
+  .mat-mdc-cell {
+    padding: 8px 4px;
+  }
+
+  .d-flex.gap-2 {
+    gap: 0.25rem !important;
+  }
+}
+
+/* Estados de carga y vacío */
+.text-center.py-5 {
+  background: white;
+  border-radius: 8px;
+  margin: 20px;
+}
+
+/* Animaciones */
+.mat-mdc-card {
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+/* Iconos */
+.mat-icon {
+  vertical-align: middle;
+}
+
+/* Tooltips */
+.mat-mdc-tooltip {
+  font-size: 0.875rem;
+}
+
+/* Paginación */
+.mat-mdc-paginator {
+  background: white;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Ordenamiento */
+.mat-sort-header-container {
+  align-items: center;
+}
+
+.mat-sort-header-arrow {
+  color: #6c757d;
+}
+
+/* Estados de formulario */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-wrapper {
+  border-color: #dc3545;
+}
+
+/* Botones del formulario */
+.mat-mdc-raised-button,
+.mat-mdc-stroked-button {
+  min-width: 120px;
+}
+
+/* Mensajes de estado */
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 576px) {
+  .container-fluid {
+    padding: 1rem !important;
+  }
+
+  .display-6 {
+    font-size: 1.75rem !important;
+  }
+
+  .lead {
+    font-size: 1rem !important;
+  }
+
+  .row.g-3 {
+    --bs-gutter-y: 0.75rem;
+  }
+
+  .col-12.col-md-6 {
+    margin-bottom: 1rem;
+  }
+}

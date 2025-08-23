@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { GestionContableComponent } from './components/gestion-contable/gestion-contable.component';
 import { TablaGestionContableComponent } from './components/componente-tabla-editar-dialogo/tabla-gestion-contable';
 import { VentasDiaComponent } from './components/ventas-dia/ventas-dia.component';
+import { TablaVentasDiaComponent } from './components/ventas-dia/tabla-ventas-dia';
 
 export const routes: Routes = [
   {
@@ -12,6 +13,7 @@ export const routes: Routes = [
 
       { path: 'gestion-contable', component: GestionContableComponent },
       { path: 'ventas-dia', component: VentasDiaComponent },
+      { path: 'tabla-ventas-dia', component: TablaVentasDiaComponent },
       { path: 'tabla-gestion-contable', component: TablaGestionContableComponent },
     ]
   }

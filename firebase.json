@@ -1,10 +1,10 @@
 {
   "firestore": {
-    "rules": "firestore.rules",
+    "rules": "firestore.rules.ventas-dia",
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "dist/gestion_contabilidad_AMO/browser",
+    "public": "dist/gestion-contabilidad-amo/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
