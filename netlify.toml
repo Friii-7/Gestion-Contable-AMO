@@ -1,0 +1,8 @@
+[build]
+  command = "npx ng build --configuration netlify"
+  publish = "dist/gestion_contabilidad_AMO/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
