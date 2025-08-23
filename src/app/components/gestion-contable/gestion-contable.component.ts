@@ -51,7 +51,6 @@ interface GestionContable {
     MatIconModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    TablaGestionContableComponent
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gestion-contable.component.html',

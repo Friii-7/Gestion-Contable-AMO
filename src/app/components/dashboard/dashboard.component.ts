@@ -1,7 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy } from '@angular/core';
+import { DashboardService } from '../../services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +11,9 @@ import { ChangeDetectionStrategy } from '@angular/core';
   styleUrl: './dashboard.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
+  private readonly dashboardService = inject(DashboardService);
+
   protected readonly dashboardCards = signal([
     {
       title: 'Gestión Contable',
@@ -43,10 +45,61 @@ export class DashboardComponent {
     }
   ]);
 
-  protected readonly stats = signal([
-    { label: 'Registros Contables', value: '150+', icon: '📊' },
-    { label: 'Ventas del Mes', value: '$25,000', icon: '💰' },
-    { label: 'Transacciones', value: '89', icon: '🔄' },
-    { label: 'Reportes', value: '12', icon: '📋' }
-  ]);
+  // Usar el servicio para obtener datos reales
+  protected readonly stats = this.dashboardService.stats;
+  protected readonly ventasRecientes = this.dashboardService.ventasRecientes;
+  protected readonly contabilidadReciente = this.dashboardService.contabilidadReciente;
+  protected readonly totalVentasHoy = this.dashboardService.totalVentasHoy;
+  protected readonly totalContableHoy = this.dashboardService.totalContableHoy;
+
+  // Estado de carga
+  protected readonly isLoading = signal(true);
+
+  async ngOnInit(): Promise<void> {
+    try {
+      this.isLoading.set(true);
+      await this.dashboardService.cargarDashboard();
+    } catch (error) {
+      console.error('Error inicializando dashboard:', error);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  /**
+   * Actualiza los datos del dashboard
+   */
+  async actualizarDatos(): Promise<void> {
+    try {
+      this.isLoading.set(true);
+      await this.dashboardService.actualizarDashboard();
+    } catch (error) {
+      console.error('Error actualizando dashboard:', error);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  /**
+   * Formatea un número como moneda colombiana
+   */
+  protected formatearMoneda(valor: number): string {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(valor);
+  }
+
+  /**
+   * Formatea una fecha de manera legible
+   */
+  protected formatearFecha(fecha: Date): string {
+    return fecha.toLocaleDateString('es-CO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
 }

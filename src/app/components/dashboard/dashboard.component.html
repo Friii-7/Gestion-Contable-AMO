@@ -3,20 +3,84 @@
   <div class="dashboard-header">
     <h1 class="dashboard-title">🏠 Dashboard - Sistema AMO</h1>
     <p class="dashboard-subtitle">Bienvenido al sistema de gestión contable</p>
+
+    <!-- Botón de actualización -->
+    <button
+      class="refresh-btn"
+      (click)="actualizarDatos()"
+      [disabled]="isLoading()">
+      @if (!isLoading()) {
+        <span>🔄 Actualizar</span>
+      } @else {
+        <span>⏳ Cargando...</span>
+      }
+    </button>
   </div>
 
-  <!-- Estadísticas rápidas -->
-  <div class="stats-grid">
-    @for (stat of stats(); track stat.label) {
+  <!-- Indicador de carga -->
+  @if (isLoading()) {
+    <div class="loading-indicator">
+      <div class="spinner"></div>
+      <p>Cargando datos del dashboard...</p>
+    </div>
+  }
+
+  <!-- Estadísticas rápidas con datos reales -->
+  @if (!isLoading()) {
+    <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon">{{ stat.icon }}</div>
+        <div class="stat-icon">📊</div>
         <div class="stat-content">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-value">{{ stats().registrosContables }}</div>
+          <div class="stat-label">Registros Contables</div>
         </div>
       </div>
-    }
-  </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ formatearMoneda(stats().ventasMes) }}</div>
+          <div class="stat-label">Ventas del Mes</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats().transacciones }}</div>
+          <div class="stat-label">Transacciones Hoy</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stats().reportes }}</div>
+          <div class="stat-label">Reportes Generados</div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Resumen del día -->
+  @if (!isLoading()) {
+    <div class="daily-summary">
+      <h2>📅 Resumen del Día</h2>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <h3>Ventas del Día</h3>
+          <div class="summary-value">{{ formatearMoneda(totalVentasHoy()) }}</div>
+          <div class="summary-label">Total de ventas registradas hoy</div>
+        </div>
+
+        <div class="summary-card">
+          <h3>Contabilidad del Día</h3>
+          <div class="summary-value">{{ formatearMoneda(totalContableHoy()) }}</div>
+          <div class="summary-label">Total de registros contables hoy</div>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Tarjetas de navegación -->
   <div class="dashboard-grid">
@@ -34,6 +98,54 @@
       </div>
     }
   </div>
+
+  <!-- Actividad reciente -->
+  @if (!isLoading()) {
+    <div class="recent-activity">
+      <h2>📊 Actividad Reciente</h2>
+
+      <div class="activity-grid">
+        <!-- Ventas recientes -->
+        <div class="activity-section">
+          <h3>💰 Últimas Ventas</h3>
+          <div class="activity-list">
+            @for (venta of ventasRecientes(); track venta.id) {
+              <div class="activity-item">
+                <div class="activity-icon">💰</div>
+                <div class="activity-content">
+                  <div class="activity-title">{{ formatearMoneda(venta.valorProducto) }}</div>
+                  <div class="activity-date">{{ formatearFecha(venta.fecha) }}</div>
+                </div>
+              </div>
+            }
+            @if (ventasRecientes().length === 0) {
+              <div class="no-data">No hay ventas registradas</div>
+            }
+          </div>
+        </div>
+
+        <!-- Contabilidad reciente -->
+        <div class="activity-section">
+          <h3>📊 Últimos Registros Contables</h3>
+          <div class="activity-list">
+            @for (contable of contabilidadReciente(); track contable.id) {
+              <div class="activity-item">
+                <div class="activity-icon">📊</div>
+                <div class="activity-content">
+                  <div class="activity-title">{{ formatearMoneda(contable.total) }}</div>
+                  <div class="activity-subtitle">{{ contable.estado }}</div>
+                  <div class="activity-date">{{ formatearFecha(contable.fechaRegistro) }}</div>
+                </div>
+              </div>
+            }
+            @if (contabilidadReciente().length === 0) {
+              <div class="no-data">No hay registros contables</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Información adicional -->
   <div class="info-section">
