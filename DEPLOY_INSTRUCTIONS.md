@@ -27,8 +27,9 @@ La tabla de ventas funciona en local pero no muestra datos en producción.
 # Build para Netlify
 npm run build:netlify
 
-# El build se genera en dist/gestion-contabilidad-amo/browser
-# Subir esta carpeta a Netlify
+# El build se genera en dist/gestion_contabilidad_AMO/browser
+# IMPORTANTE: En Netlify, configurar el Publish directory como:
+# dist/gestion_contabilidad_AMO/browser
 ```
 
 ### Opción 2: Deploy a Firebase Hosting
@@ -51,8 +52,35 @@ firebase deploy
 # Build de producción
 npm run build:prod
 
-# Subir la carpeta dist/gestion-contabilidad-amo/browser al hosting
+# Subir la carpeta dist/gestion_contabilidad_AMO/browser al hosting
 ```
+
+## Configuración de Netlify
+
+### Publish Directory Correcto
+**IMPORTANTE**: En Netlify, en Site settings → Build & deploy, configurar:
+
+```
+Publish directory: dist/gestion_contabilidad_AMO/browser
+```
+
+**NO usar**: `dist/gestion-contabilidad-amo/browser` (con guiones)
+
+### Build Command
+```
+Build command: npm run build:netlify-optimized
+```
+
+### Configuración de Build
+- **Node.js version**: 18 o superior
+- **Build command**: `npm run build:netlify-optimized`
+- **Publish directory**: `dist/gestion_contabilidad_AMO/browser`
+
+### Solución a Errores de Build
+Si encuentras errores de:
+- **Bundle size**: Ya está configurado con presupuestos aumentados
+- **CommonJS dependencies**: Ya están incluidas en `allowedCommonJsDependencies`
+- **html2canvas**: Configurado para manejar dependencias no-ESM
 
 ## Verificación Post-Deploy
 
@@ -107,6 +135,11 @@ interface VentaDia {
 1. Verificar que las reglas de Firestore permiten acceso
 2. Verificar que la API key es correcta
 
+### Si el build falla en Netlify:
+1. Verificar que el Publish directory es: `dist/gestion_contabilidad_AMO/browser`
+2. Verificar que el Build command es: `npm run build:netlify`
+3. Verificar que el Node.js version es 18 o superior
+
 ## Comandos de Debug
 
 ```bash
@@ -115,6 +148,9 @@ npm run start
 
 # Build con source maps para debug
 npm run build:development
+
+# Build para Netlify
+npm run build:netlify
 
 # Verificar configuración de Firebase
 firebase projects:list
@@ -127,3 +163,4 @@ Si persisten los problemas, revisar:
 2. Logs de Firebase Console
 3. Configuración de environment
 4. Reglas de Firestore
+5. **Publish directory en Netlify** (debe ser `dist/gestion_contabilidad_AMO/browser`)

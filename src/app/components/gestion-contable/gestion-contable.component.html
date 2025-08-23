@@ -51,30 +51,43 @@
 
             <!-- Valor de Ventas -->
             <div class="col-12 col-md-6">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Valor de Ventas</mat-label>
-                <input matInput type="number" formControlName="valorVentas" placeholder="0" min="0" required>
-                <mat-icon matSuffix class="text-success">attach_money</mat-icon>
+              <div class="d-flex align-items-center gap-2">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Valor de Ventas (Total del Día)</mat-label>
+                  <input matInput type="number" formControlName="valorVentas" placeholder="0" min="0" required readonly>
+                  @if (isLoadingVentas()) {
+                    <mat-spinner matSuffix diameter="20"></mat-spinner>
+                  } @else {
+                    <mat-icon matSuffix class="text-success">attach_money</mat-icon>
+                  }
 
-                @if (hasError('valorVentas')) {
-                <mat-error>{{ getErrorMessage('valorVentas') }}</mat-error>
-                }
-              </mat-form-field>
+                  @if (hasError('valorVentas')) {
+                  <mat-error>{{ getErrorMessage('valorVentas') }}</mat-error>
+                  }
+                </mat-form-field>
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="btn btn-outline-primary"
+                  (click)="cargarTotalVentasDia()"
+                  matTooltip="Recargar total de ventas del día"
+                  [disabled]="isLoadingVentas()"
+                  style="height: 56px; width: 56px;">
+                  @if (isLoadingVentas()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    <mat-icon>refresh</mat-icon>
+                  }
+                </button>
+              </div>
+              <small class="text-muted d-block mt-1">
+                <mat-icon class="me-1" style="font-size: 16px; vertical-align: middle;">info</mat-icon>
+                Este valor se llena automáticamente con el total de ventas del día seleccionado.
+                Use el botón de recarga para actualizar los datos en tiempo real.
+              </small>
             </div>
 
-            <!-- Observación de Venta -->
-            <div class="col-12">
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label>Observación de Venta</mat-label>
-                <textarea matInput formControlName="observacionVenta" rows="3" placeholder="Describa qué vendió..."
-                  required></textarea>
-                <mat-icon matSuffix class="text-info">description</mat-icon>
 
-                @if (hasError('observacionVenta')) {
-                <mat-error>{{ getErrorMessage('observacionVenta') }}</mat-error>
-                }
-              </mat-form-field>
-            </div>
 
             <!-- Método de Pago -->
             <div class="col-12 col-md-6">

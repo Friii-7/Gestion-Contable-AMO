@@ -54,7 +54,6 @@ export class EditarGestionContableDialogComponent implements OnInit {
       {
         fechaRegistro: [new Date(), Validators.required],
         valorVentas: [0, [Validators.required, Validators.min(0)]],
-        observacionVenta: [''],
         metodoPago: ['efectivo', Validators.required],
         valorPago: [0, [Validators.required, Validators.min(0)]],
         gastos: [0, [Validators.required, Validators.min(0)]],

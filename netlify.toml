@@ -1,6 +1,6 @@
 [build]
-  publish = "dist/gestion-contabilidad-amo/browser"
-  command = "npm run build"
+  publish = "dist/gestion_contabilidad_AMO/browser"
+  command = "npm run build:netlify-optimized"
 
 [build.environment]
   NODE_VERSION = "18"

@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, signal, inject, NgZone } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, inject, NgZone, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Firestore, collection, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, query, where, getDocs } from '@angular/fire/firestore';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -15,13 +15,14 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TablaGestionContableComponent } from '../componente-tabla-editar-dialogo/tabla-gestion-contable/componente-tabla-gestion-contable.component';
+import { DashboardService } from '../../services/dashboard.service';
 
 interface GestionContable {
   id?: string;
   fechaRegistro: Date;
   valorVentas: number;
-  observacionVenta: string;
   metodoPago: string;
   valorPago: number;
   gastos: number; // gastos operativos (NO incluye pago de Carlos)
@@ -51,15 +52,17 @@ interface GestionContable {
     MatIconModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    MatTooltipModule,
 ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gestion-contable.component.html',
   styleUrls: ['./gestion-contable.component.css'],
 })
-export class GestionContableComponent {
+export class GestionContableComponent implements OnInit {
   private readonly firestore = inject(Firestore);
   private readonly ngZone = inject(NgZone);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dashboardService = inject(DashboardService);
 
   // Constantes
   readonly PAGO_DIARIO_CARLOS = 60_000;
@@ -74,9 +77,11 @@ export class GestionContableComponent {
   // Estado (signals)
   private readonly _isSubmitting = signal(false);
   private readonly _formData = signal<GestionContable | null>(null);
+  private readonly _isLoadingVentas = signal(false);
 
   readonly isSubmitting = this._isSubmitting.asReadonly();
   readonly formData = this._formData.asReadonly();
+  readonly isLoadingVentas = this._isLoadingVentas.asReadonly();
 
   // Formulario
   readonly form: FormGroup;
@@ -88,7 +93,6 @@ export class GestionContableComponent {
     this.form = this.fb.group({
       fechaRegistro: [new Date(), [Validators.required]],
       valorVentas: [null, [Validators.required, Validators.min(0)]],
-      observacionVenta: ['', [Validators.required, Validators.minLength(10)]],
       metodoPago: ['efectivo', [Validators.required]],
       valorPago: [null, [Validators.required, Validators.min(0)]],
       gastos: [null, [Validators.required, Validators.min(0)]],
@@ -113,6 +117,75 @@ export class GestionContableComponent {
         this.form.patchValue({ valorPago: valor });
       }
     });
+  }
+
+  ngOnInit(): void {
+    // Cargar el total de ventas del día actual al inicializar
+    this.cargarTotalVentasDia();
+
+    // Suscribirse a cambios en la fecha para recalcular ventas
+    this.form.get('fechaRegistro')?.valueChanges.subscribe(fecha => {
+      if (fecha) {
+        // Limpiar el campo de valor de ventas antes de cargar el nuevo total
+        this.form.patchValue({ valorVentas: null });
+        // Cargar el total de ventas para la nueva fecha
+        this.cargarTotalVentasDia(fecha);
+      }
+    });
+  }
+
+  /**
+   * Carga el total de ventas del día especificado (o del día actual si no se especifica)
+   */
+  async cargarTotalVentasDia(fecha?: Date): Promise<void> {
+    this._isLoadingVentas.set(true);
+
+    try {
+      const fechaBuscar = fecha || new Date();
+      const inicioDia = new Date(fechaBuscar.getFullYear(), fechaBuscar.getMonth(), fechaBuscar.getDate(), 0, 0, 0, 0);
+      const finDia = new Date(fechaBuscar.getFullYear(), fechaBuscar.getMonth(), fechaBuscar.getDate(), 23, 59, 59, 999);
+
+      // Consultar ventas del día en Firestore
+      const ventasRef = collection(this.firestore, 'ventas-dia');
+      const ventasQuery = query(
+        ventasRef,
+        where('fecha', '>=', inicioDia),
+        where('fecha', '<=', finDia)
+      );
+
+      const ventasSnapshot = await getDocs(ventasQuery);
+      let totalVentas = 0;
+
+      ventasSnapshot.forEach(doc => {
+        const data = doc.data();
+        totalVentas += data['valorProducto'] || 0;
+      });
+
+      // Actualizar el campo valorVentas con el total real
+      this.form.patchValue({ valorVentas: totalVentas });
+
+      // Si el método de pago es 'entrega_reza', también actualizar el valorPago
+      const metodoPago = this.form.get('metodoPago')?.value;
+      if (metodoPago === 'entrega_reza') {
+        this.form.patchValue({ valorPago: totalVentas });
+      }
+
+      console.log(`Total de ventas del día ${fechaBuscar.toLocaleDateString()}: $${totalVentas.toLocaleString()}`);
+
+      // Mostrar mensaje de éxito si se cargó manualmente
+      if (!fecha) {
+        this.snackBar.open(`Total de ventas del día cargado: $${totalVentas.toLocaleString()}`, 'Cerrar', {
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error('Error al cargar total de ventas del día:', error);
+      this.snackBar.open('Error al cargar el total de ventas del día', 'Cerrar', {
+        duration: 3000
+      });
+    } finally {
+      this._isLoadingVentas.set(false);
+    }
   }
 
   // Validación personalizada para el valor del pago
@@ -178,7 +251,6 @@ export class GestionContableComponent {
       const payload: Omit<GestionContable, 'id' | 'fechaCreacion' | 'fechaActualizacion'> = {
         fechaRegistro: this.form.get('fechaRegistro')?.value,
         valorVentas: Number(this.form.get('valorVentas')?.value) || 0,
-        observacionVenta: this.form.get('observacionVenta')?.value,
         metodoPago: this.form.get('metodoPago')?.value,
         valorPago: Number(this.form.get('valorPago')?.value) || 0,
         gastos: Number(this.form.get('gastos')?.value) || 0,
@@ -211,13 +283,15 @@ export class GestionContableComponent {
       this.form.reset({
         fechaRegistro: new Date(),
         valorVentas: null,
-        observacionVenta: '',
         metodoPago: 'efectivo',
         valorPago: null,
         gastos: null,
         observacionGasto: '',
         pagoDiaCarlos: false,
       });
+
+      // Cargar automáticamente el total de ventas del día actual
+      this.cargarTotalVentasDia();
 
     } catch (error) {
       console.error('Error al guardar:', error);
@@ -229,11 +303,10 @@ export class GestionContableComponent {
     }
   }
 
-  limpiarFormulario(): void {
+    limpiarFormulario(): void {
     this.form.reset({
       fechaRegistro: new Date(),
       valorVentas: null,
-      observacionVenta: '',
       metodoPago: 'efectivo',
       valorPago: null,
       gastos: null,
@@ -241,6 +314,9 @@ export class GestionContableComponent {
       pagoDiaCarlos: false,
     });
     this._formData.set(null);
+
+    // Cargar automáticamente el total de ventas del día actual
+    this.cargarTotalVentasDia();
   }
 
   // Método para probar conexión a Firebase

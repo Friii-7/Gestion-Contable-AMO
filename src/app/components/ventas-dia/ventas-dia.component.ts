@@ -20,6 +20,7 @@ interface VentaDia {
   hora: string;
   nombreProducto: string;
   valorProducto: number;
+  metodoPago: string; // Campo para el método de pago
   tipo: 'venta-dia'; // Campo para identificar el tipo de registro
   fechaCreacion?: Date;
   fechaActualizacion?: Date;
@@ -70,6 +71,7 @@ export class VentasDiaComponent {
       hora: ['', [Validators.required]],
       nombreProducto: ['', [Validators.required, Validators.minLength(3)]],
       valorProducto: [null, [Validators.required, Validators.min(0)]],
+      metodoPago: ['', [Validators.required]], // Campo para método de pago
     });
 
     // Establecer hora actual por defecto
@@ -98,6 +100,20 @@ export class VentasDiaComponent {
     return 'Campo inválido';
   }
 
+  getMetodoPagoDisplay(metodoPago: string): string {
+    const metodos: { [key: string]: string } = {
+      'efectivo': 'Efectivo',
+      'tarjeta-debito': 'Tarjeta de Débito',
+      'tarjeta-credito': 'Tarjeta de Crédito',
+      'transferencia': 'Transferencia Bancaria',
+      'pse': 'PSE',
+      'nequi': 'Nequi',
+      'daviplata': 'Daviplata',
+      'otro': 'Otro'
+    };
+    return metodos[metodoPago] || metodoPago;
+  }
+
   // --- Acciones ---
   async onSubmit(): Promise<void> {
     if (this.form.invalid) return;
@@ -111,6 +127,7 @@ export class VentasDiaComponent {
         hora: this.form.get('hora')?.value,
         nombreProducto: this.form.get('nombreProducto')?.value,
         valorProducto: Number(this.form.get('valorProducto')?.value) || 0,
+        metodoPago: this.form.get('metodoPago')?.value,
         tipo: 'venta-dia',
       };
 
@@ -140,6 +157,7 @@ export class VentasDiaComponent {
         hora: '',
         nombreProducto: '',
         valorProducto: null,
+        metodoPago: '',
       });
 
       // Establecer hora actual nuevamente
@@ -161,6 +179,7 @@ export class VentasDiaComponent {
       hora: '',
       nombreProducto: '',
       valorProducto: null,
+      metodoPago: '',
     });
     this._formData.set(null);
     this.setHoraActual();

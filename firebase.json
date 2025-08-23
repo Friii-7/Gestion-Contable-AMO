@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "dist/gestion-contabilidad-amo/browser",
+    "public": "dist/gestion_contabilidad_AMO/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

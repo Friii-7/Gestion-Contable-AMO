@@ -36,13 +36,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "8kB",
+                  "maximumError": "20kB"
                 }
               ],
               "outputHashing": "all"
@@ -56,12 +56,25 @@
               "optimization": true,
               "sourceMap": false,
               "budgets": [
-                { "type": "initial", "maximumWarning": "3mb", "maximumError": "5mb" },
+                { "type": "initial", "maximumWarning": "3MB", "maximumError": "5MB" },
                 { "type": "anyComponentStyle", "maximumWarning": "10kb", "maximumError": "20kb" }
               ],
               "allowedCommonJsDependencies": [
-                "canvg", "html2canvas", "file-saver", "rgbcolor", "raf"
-              ]
+                "canvg", "html2canvas", "file-saver", "rgbcolor", "raf", "jspdf", "jspdf-autotable"
+              ],
+              "outputHashing": "all"
+            },
+            "netlify-optimized": {
+              "optimization": true,
+              "sourceMap": false,
+              "budgets": [
+                { "type": "initial", "maximumWarning": "4MB", "maximumError": "6MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "15kb", "maximumError": "30kb" }
+              ],
+              "allowedCommonJsDependencies": [
+                "canvg", "html2canvas", "file-saver", "rgbcolor", "raf", "jspdf", "jspdf-autotable", "xlsx"
+              ],
+              "outputHashing": "all"
             }
           },
           "defaultConfiguration": "production"

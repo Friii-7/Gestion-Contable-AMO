@@ -39,7 +39,6 @@ export interface GestionContable {
   id?: string;
   fechaRegistro: any; // Firestore Timestamp | Date
   valorVentas: number;
-  observacionVenta: string;
   metodoPago: 'consignacion' | 'entrega_reza' | 'efectivo';
   valorPago: number;
   gastos: number; // gastos operativos (NO incluye pago de Carlos)
@@ -117,7 +116,6 @@ export class TablaGestionContableComponent implements OnInit, AfterViewInit {
     { header: 'Gastos', dataKey: 'gastos', width: 20 },
     { header: 'Pago Carlos', dataKey: 'pagoDiaCarlos', width: 20 },
     { header: 'Total', dataKey: 'total', width: 20 },
-    { header: 'Observación Venta', dataKey: 'observacionVenta', width: 30 },
     { header: 'Observación Gasto', dataKey: 'observacionGasto', width: 30 },
     { header: 'Estado', dataKey: 'estado', width: 20 }
   ];
@@ -208,7 +206,6 @@ export class TablaGestionContableComponent implements OnInit, AfterViewInit {
       // Texto: busca en observaciones, estado y método
       const texto = (f.texto ?? '').trim().toLowerCase();
       const hayTexto = !texto || [
-        row.observacionVenta,
         row.observacionGasto,
         row.estado,
         this.getMetodoPagoLabel(row.metodoPago),
@@ -384,7 +381,6 @@ export class TablaGestionContableComponent implements OnInit, AfterViewInit {
       Gastos: ${this.formatearMoneda(row.gastos)}
       Pago Carlos: ${row.pagoDiaCarlos ? 'Sí' : 'No'}
       Total: ${this.formatearMoneda(row.total)}
-      Observación Venta: ${row.observacionVenta}
       Observación Gasto: ${row.observacionGasto}
       Estado: ${row.estado}
     `;

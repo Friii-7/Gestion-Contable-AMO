@@ -1,0 +1,9 @@
+# Browsers that we support
+
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Safari versions
+last 2 Edge versions
+not IE 9-11 # Angular supports IE 9-11 only with polyfills
+not dead
+not op_mini all
