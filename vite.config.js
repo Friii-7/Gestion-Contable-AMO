@@ -22,3 +22,4 @@ export default defineConfig({
     include: ['jspdf', 'jspdf-autotable', 'xlsx', 'file-saver']
   }
 });
+
