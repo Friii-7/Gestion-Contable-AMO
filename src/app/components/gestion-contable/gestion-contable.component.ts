@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Firestore, collection, addDoc } from '@angular/fire/firestore';
+import { TablaGestionContableComponent } from '../componente-tabla-gestion-contable/componente-tabla-gestion-contable.component';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -51,6 +52,7 @@ interface GestionContable {
     MatIconModule,
     MatProgressSpinnerModule,
     MatSelectModule,
+    TablaGestionContableComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gestion-contable.component.html',
