@@ -1,0 +1,70 @@
+// Reglas de Firestore para la colección de Ventas del Día
+// Este archivo contiene las reglas de seguridad específicas para la colección 'ventas-dia'
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Colección de Ventas del Día
+    match /ventas-dia/{document} {
+
+      // Permitir lectura a usuarios autenticados
+      allow read: if request.auth != null;
+
+      // Permitir escritura a usuarios autenticados
+      allow create: if request.auth != null
+        && request.resource.data.fecha is timestamp
+        && request.resource.data.hora is string
+        && request.resource.data.nombreProducto is string
+        && request.resource.data.valorProducto is number
+        && request.resource.data.valorProducto > 0
+        && request.resource.data.nombreProducto.size() >= 3;
+
+      // Permitir actualización solo al propietario del documento
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+
+      // Permitir eliminación solo al propietario del documento
+      allow delete: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // Reglas para otras colecciones existentes
+    match /gestion-contable/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Regla por defecto: denegar acceso
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/*
+NOTAS IMPORTANTES:
+
+1. AUTENTICACIÓN:
+   - Todas las operaciones requieren autenticación
+   - Se recomienda implementar autenticación con Firebase Auth
+
+2. VALIDACIÓN DE DATOS:
+   - La fecha debe ser un timestamp válido
+   - La hora debe ser un string en formato HH:MM
+   - El nombre del producto debe tener al menos 3 caracteres
+   - El valor del producto debe ser un número positivo
+
+3. SEGURIDAD:
+   - Solo el propietario puede modificar/eliminar sus registros
+   - Se recomienda agregar campo userId al crear documentos
+
+4. IMPLEMENTACIÓN:
+   - Copiar estas reglas al archivo firestore.rules principal
+   - Asegurarse de que Firebase Auth esté configurado
+   - Probar las reglas en el simulador de Firestore
+
+5. PERSONALIZACIÓN:
+   - Ajustar las reglas según los requisitos específicos del negocio
+   - Considerar roles de usuario (admin, vendedor, etc.)
+   - Implementar auditoría de cambios si es necesario
+*/

@@ -1,0 +1,157 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-6">
+
+      <!-- Header -->
+      <div class="text-center mb-4">
+        <h2 class="display-6 fw-bold text-success">
+          <mat-icon class="me-3">shopping_cart</mat-icon>
+          Ventas del Día
+        </h2>
+        <p class="lead text-muted">Registro rápido de ventas diarias</p>
+      </div>
+
+      <!-- Formulario de Ventas -->
+      <mat-card class="shadow-lg border-0">
+        <mat-card-header class="bg-success text-white">
+          <mat-card-title>
+            <mat-icon class="me-2">add_shopping_cart</mat-icon>
+            Nueva Venta
+          </mat-card-title>
+          <mat-card-subtitle class="text-white-50">
+            Complete los datos de la venta realizada
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="p-4">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" class="row g-4">
+
+            <!-- Fecha -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Fecha de Venta</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="fecha" placeholder="Seleccione fecha"
+                  required>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-icon matSuffix class="text-primary">calendar_today</mat-icon>
+
+                @if (hasError('fecha')) {
+                <mat-error>{{ getErrorMessage('fecha') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Hora -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Hora de Venta</mat-label>
+                <input matInput type="time" formControlName="hora" placeholder="HH:MM" required>
+                <mat-icon matSuffix class="text-primary">schedule</mat-icon>
+
+                @if (hasError('hora')) {
+                <mat-error>{{ getErrorMessage('hora') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Nombre del Producto -->
+            <div class="col-12">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Nombre del Producto</mat-label>
+                <input matInput formControlName="nombreProducto" placeholder="Ej: Camiseta, Zapatos, Accesorios..."
+                  required>
+                <mat-icon matSuffix class="text-info">inventory_2</mat-icon>
+
+                @if (hasError('nombreProducto')) {
+                <mat-error>{{ getErrorMessage('nombreProducto') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Valor del Producto -->
+            <div class="col-12">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Valor del Producto</mat-label>
+                <input matInput type="number" formControlName="valorProducto" placeholder="0" min="0" required>
+                <mat-icon matSuffix class="text-success">attach_money</mat-icon>
+
+                @if (hasError('valorProducto')) {
+                <mat-error>{{ getErrorMessage('valorProducto') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Resumen de la Venta -->
+            <div class="col-12">
+              <mat-divider class="my-3"></mat-divider>
+              <div class="row text-center g-3">
+                <div class="col-12 col-md-6">
+                  <div class="card bg-light border-0">
+                    <div class="card-body">
+                      <h6 class="card-title text-muted">Producto</h6>
+                      <h5 class="text-info mb-0">
+                        {{ form.get('nombreProducto')?.value || 'Sin especificar' }}
+                      </h5>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <div class="card bg-success text-white border-0">
+                    <div class="card-body">
+                      <h6 class="card-title">Valor Total</h6>
+                      <h4 class="mb-0">
+                        {{ form.get('valorProducto')?.value || 0 | currency:'COP':'symbol':'1.0-0' }}
+                      </h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="col-12 text-center mt-3">
+              <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <button mat-raised-button color="success" type="submit">
+                  @if (!isSubmitting()) { <mat-icon class="me-2">save</mat-icon> }
+                  @if (isSubmitting()) { <mat-spinner diameter="20"></mat-spinner> }
+                  {{ isSubmitting() ? 'Guardando...' : 'Guardar Venta' }}
+                </button>
+
+                <button mat-stroked-button type="button" (click)="limpiarFormulario()">
+                  <mat-icon class="me-2">clear</mat-icon>
+                  Limpiar Formulario
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Confirmación de Venta Registrada -->
+      @if (formData()) {
+      <div class="mt-4">
+        <mat-card class="bg-success text-white border-0">
+          <mat-card-content class="p-3">
+            <div class="d-flex align-items-center">
+              <mat-icon class="me-3">check_circle</mat-icon>
+              <div>
+                <h6 class="mb-1">¡Venta Registrada Exitosamente!</h6>
+                <p class="mb-0">
+                  <strong>{{ formData()?.nombreProducto }}</strong> -
+                  {{ formData()?.valorProducto | currency:'COP':'symbol':'1.0-0' }}
+                </p>
+                <small class="text-white-50">
+                  {{ formData()?.fecha | date:'shortDate' }} a las {{ formData()?.hora }}
+                </small>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+
+    </div>
+  </div>
+</div>

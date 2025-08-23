@@ -1,0 +1,198 @@
+/* Estilos para el componente de Ventas del Día */
+
+.container-fluid {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 100vh;
+}
+
+/* Header */
+.display-6 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-success {
+  color: #28a745 !important;
+}
+
+/* Card principal */
+mat-card {
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+mat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Header de la card */
+mat-card-header.bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  border-radius: 16px 16px 0 0;
+  padding: 1.5rem;
+}
+
+mat-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+mat-card-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Campos del formulario */
+mat-form-field {
+  margin-bottom: 0.5rem;
+}
+
+mat-form-field.mat-form-field-appearance-outline .mat-form-field-outline {
+  border-radius: 8px;
+}
+
+mat-form-field.mat-form-field-appearance-outline .mat-form-field-outline-thick {
+  border-width: 2px;
+}
+
+/* Iconos en los campos */
+mat-icon[matSuffix] {
+  color: #6c757d;
+  transition: color 0.3s ease;
+}
+
+mat-form-field:focus-within mat-icon[matSuffix] {
+  color: #28a745;
+}
+
+/* Botones */
+button[mat-raised-button] {
+  border-radius: 25px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+button[mat-raised-button]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+button[mat-stroked-button] {
+  border-radius: 25px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+button[mat-stroked-button]:hover {
+  background-color: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+/* Cards de resumen */
+.card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card.bg-light {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+}
+
+.card.bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Confirmación de venta */
+.bg-success .mat-card-content {
+  border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1rem;
+  }
+
+  mat-card {
+    margin: 0 0.5rem;
+  }
+
+  button[mat-raised-button],
+  button[mat-stroked-button] {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .d-flex.gap-3 {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+mat-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Estados de los campos */
+mat-form-field.mat-form-field-invalid .mat-form-field-outline-thick {
+  border-color: #dc3545;
+}
+
+mat-form-field.mat-form-field-valid .mat-form-field-outline-thick {
+  border-color: #28a745;
+}
+
+/* Spinner */
+mat-spinner {
+  margin: 0 auto;
+}
+
+/* Divider */
+mat-divider {
+  border-color: #dee2e6;
+  border-width: 1px;
+}
+
+/* Placeholder */
+::placeholder {
+  color: #adb5bd;
+  font-style: italic;
+}
+
+/* Focus states */
+mat-form-field:focus-within .mat-form-field-outline-thick {
+  border-color: #28a745;
+  border-width: 2px;
+}
