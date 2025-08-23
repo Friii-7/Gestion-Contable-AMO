@@ -1,0 +1,33 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo y título -->
+    <div class="navbar-brand">
+      <img src="/image/amo.png" alt="AMO Logo" class="navbar-logo">
+      <span class="navbar-title">Sistema AMO</span>
+    </div>
+
+    <!-- Botón hamburguesa para móvil -->
+    <button
+      class="navbar-toggle"
+      (click)="toggleMenu()"
+      aria-label="Toggle navigation menu">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
+    <!-- Menú de navegación -->
+    <div class="navbar-menu" [class.active]="isMenuOpen()">
+      @for (item of navItems(); track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          (click)="closeMenu()"
+          class="navbar-item">
+          <span class="navbar-icon">{{ item.icon }}</span>
+          <span class="navbar-label">{{ item.label }}</span>
+        </a>
+      }
+    </div>
+  </div>
+</nav>

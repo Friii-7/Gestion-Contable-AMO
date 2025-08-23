@@ -3,14 +3,14 @@ import { GestionContableComponent } from './components/gestion-contable/gestion-
 import { TablaGestionContableComponent } from './components/componente-tabla-editar-dialogo/tabla-gestion-contable';
 import { VentasDiaComponent } from './components/ventas-dia/ventas-dia.component';
 import { TablaVentasDiaComponent } from './components/ventas-dia/tabla-ventas-dia';
+import { DashboardComponent } from './components/dashboard';
 
 export const routes: Routes = [
   {
     path: '',
-
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-
+      { path: 'dashboard', component: DashboardComponent },
       { path: 'gestion-contable', component: GestionContableComponent },
       { path: 'ventas-dia', component: VentasDiaComponent },
       { path: 'tabla-ventas-dia', component: TablaVentasDiaComponent },

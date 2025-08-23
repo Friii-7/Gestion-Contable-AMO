@@ -11,7 +11,7 @@
 }
 
 .text-success {
-  color: #28a745 !important;
+  color: #BAA25C !important;
 }
 
 /* Card principal */
@@ -27,7 +27,7 @@ mat-card:hover {
 
 /* Header de la card */
 mat-card-header.bg-success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  background: linear-gradient(135deg, #BAA25C 0%, #8B7355 100%) !important;
   border-radius: 16px 16px 0 0;
   padding: 1.5rem;
 }
@@ -63,7 +63,7 @@ mat-icon[matSuffix] {
 }
 
 mat-form-field:focus-within mat-icon[matSuffix] {
-  color: #28a745;
+  color: #BAA25C;
 }
 
 /* Botones */
@@ -78,7 +78,7 @@ button[mat-raised-button] {
 
 button[mat-raised-button]:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 15px rgba(186, 162, 92, 0.3);
 }
 
 button[mat-stroked-button] {
@@ -112,7 +112,7 @@ button[mat-stroked-button]:hover {
 }
 
 .card.bg-success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  background: linear-gradient(135deg, #BAA25C 0%, #8B7355 100%) !important;
 }
 
 .card-title {
@@ -171,7 +171,7 @@ mat-form-field.mat-form-field-invalid .mat-form-field-outline-thick {
 }
 
 mat-form-field.mat-form-field-valid .mat-form-field-outline-thick {
-  border-color: #28a745;
+  border-color: #BAA25C;
 }
 
 /* Spinner */
@@ -193,6 +193,6 @@ mat-divider {
 
 /* Focus states */
 mat-form-field:focus-within .mat-form-field-outline-thick {
-  border-color: #28a745;
+  border-color: #BAA25C;
   border-width: 2px;
 }

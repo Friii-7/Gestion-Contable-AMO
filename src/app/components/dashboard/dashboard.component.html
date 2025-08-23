@@ -1,0 +1,55 @@
+<div class="dashboard">
+  <!-- Header del Dashboard -->
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">🏠 Dashboard - Sistema AMO</h1>
+    <p class="dashboard-subtitle">Bienvenido al sistema de gestión contable</p>
+  </div>
+
+  <!-- Estadísticas rápidas -->
+  <div class="stats-grid">
+    @for (stat of stats(); track stat.label) {
+      <div class="stat-card">
+        <div class="stat-icon">{{ stat.icon }}</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Tarjetas de navegación -->
+  <div class="dashboard-grid">
+    @for (card of dashboardCards(); track card.title) {
+      <div class="dashboard-card" [class]="'card-' + card.color">
+        <div class="card-icon">{{ card.icon }}</div>
+        <div class="card-content">
+          <h3 class="card-title">{{ card.title }}</h3>
+          <p class="card-description">{{ card.description }}</p>
+        </div>
+        <a [routerLink]="card.path" class="card-link">
+          <span>Acceder</span>
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    }
+  </div>
+
+  <!-- Información adicional -->
+  <div class="info-section">
+    <div class="info-card">
+      <h3>📋 Acceso Rápido</h3>
+      <p>Utiliza la barra de navegación superior para acceder rápidamente a todas las funcionalidades del sistema.</p>
+    </div>
+
+    <div class="info-card">
+      <h3>🔧 Funcionalidades</h3>
+      <ul>
+        <li>Gestión completa de contabilidad</li>
+        <li>Registro de ventas diarias</li>
+        <li>Generación de reportes</li>
+        <li>Consulta de historiales</li>
+      </ul>
+    </div>
+  </div>
+</div>

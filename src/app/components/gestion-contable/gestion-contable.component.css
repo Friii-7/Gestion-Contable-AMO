@@ -213,9 +213,9 @@ mat-icon[matSuffix] {
 
 /* Mensaje de confirmación */
 .bg-success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  background: linear-gradient(135deg, #BAA25C 0%, #8B7355 100%) !important;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 16px rgba(186, 162, 92, 0.3);
 }
 
 /* Divider personalizado */
@@ -334,7 +334,7 @@ mat-form-field[formControlName="metodoPago"] .mat-form-field-outline {
 
 /* Estilos para el campo de valor de pago */
 mat-form-field[formControlName="valorPago"] .mat-form-field-outline {
-  border-color: #28a745;
+  border-color: #BAA25C;
 }
 
 /* Mejoras en el resumen */
@@ -356,9 +356,9 @@ mat-form-field[formControlName="valorPago"] .mat-form-field-outline {
 
 /* Estilos para el mensaje de confirmación */
 .bg-success {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  background: linear-gradient(135deg, #BAA25C 0%, #8B7355 100%) !important;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 16px rgba(186, 162, 92, 0.3);
 }
 
 /* Mensajes informativos y de error */
