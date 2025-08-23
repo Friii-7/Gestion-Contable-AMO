@@ -133,12 +133,11 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
     this._loading.set(true);
 
     try {
-      const ventasRef = collection(this.firestore, 'gestion-contable');
-      // Consulta temporal sin ordenamiento para evitar error de índice
-      // TODO: Cambiar a orderBy('fecha', 'desc') después de crear el índice
+      const ventasRef = collection(this.firestore, 'ventas-dia');
+      // Consulta para obtener todas las ventas del día
       const q = query(
         ventasRef,
-        where('tipo', '==', 'venta-dia')
+        orderBy('fecha', 'desc')
       );
 
       this.unsubscribe = onSnapshot(q, (snapshot) => {
@@ -197,7 +196,7 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
     if (!venta) return;
 
     try {
-      const ventaRef = doc(this.firestore, 'gestion-contable', venta.id);
+      const ventaRef = doc(this.firestore, 'ventas-dia', venta.id);
       const updateData = {
         ...this.editForm.value,
         fechaActualizacion: new Date(),
@@ -220,7 +219,7 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
     if (!confirmacion) return;
 
     try {
-      const ventaRef = doc(this.firestore, 'gestion-contable', venta.id);
+      const ventaRef = doc(this.firestore, 'ventas-dia', venta.id);
       await deleteDoc(ventaRef);
 
       this.snackBar.open('Venta eliminada exitosamente', 'Cerrar', { duration: 3000 });

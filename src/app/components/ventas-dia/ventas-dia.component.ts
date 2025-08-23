@@ -115,10 +115,10 @@ export class VentasDiaComponent {
       };
 
       // Guardar en Firebase usando Angular Fire
-      // NOTA: Usamos 'gestion-contable' temporalmente hasta que se configuren las reglas para 'ventas-dia'
+      // NOTA: Ahora usamos la colección 'ventas-dia' separada
       let docRef: any;
       await this.ngZone.runOutsideAngular(async () => {
-        docRef = await addDoc(collection(this.firestore, 'gestion-contable'), payload);
+        docRef = await addDoc(collection(this.firestore, 'ventas-dia'), payload);
       });
 
       // Mostrar mensaje de éxito

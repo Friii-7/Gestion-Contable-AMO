@@ -1,32 +1,45 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Reglas para la colección de gestión contable
+
+    // Reglas para la colección gestion-contable
     match /gestion-contable/{document} {
       allow read, write: if true; // Temporalmente permitir todo acceso
-      // En producción, agregar autenticación:
-      // allow read, write: if request.auth != null;
     }
 
-    // Reglas para la colección de ventas del día
+    // Reglas para la colección ventas-dia
     match /ventas-dia/{document} {
       allow read, write: if true; // Temporalmente permitir todo acceso
-      // En producción, agregar autenticación:
-      // allow read, write: if request.auth != null;
     }
 
-    // Reglas para la colección de test de conexión
-    match /test-connection/{document} {
+    // Reglas para la colección reportes (si existe)
+    match /reportes/{document} {
       allow read, write: if true; // Temporalmente permitir todo acceso
-      // En producción, agregar autenticación:
-      // allow read, write: if request.auth != null;
-    }
-
-    // Reglas para la colección de registros contables (mantener compatibilidad)
-    match /registros_contables/{document} {
-      allow read, write: if true; // Temporalmente permitir todo acceso
-      // En producción, agregar autenticación:
-      // allow read, write: if request.auth != null;
     }
   }
 }
+
+/*
+NOTAS IMPORTANTES:
+
+1. ESTAS REGLAS SON TEMPORALES Y PERMITEN ACCESO COMPLETO
+2. EN PRODUCCIÓN, DEBES IMPLEMENTAR AUTENTICACIÓN Y AUTORIZACIÓN
+3. RECOMENDACIONES DE SEGURIDAD:
+   - Implementar Firebase Auth
+   - Agregar validación de usuario
+   - Restringir acceso basado en roles
+   - Validar estructura de datos
+   - Implementar auditoría de cambios
+
+4. ESTRUCTURA RECOMENDADA:
+   - gestion-contable: Para registros contables generales
+   - ventas-dia: Para ventas diarias específicas
+   - reportes: Para reportes generados
+   - usuarios: Para información de usuarios (con autenticación)
+
+5. PRÓXIMOS PASOS:
+   - Configurar Firebase Auth
+   - Implementar reglas de autorización
+   - Agregar validación de datos
+   - Crear índices necesarios
+*/

@@ -5,9 +5,15 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "tipo",
+          "fieldPath": "fechaRegistro",
           "order": "ASCENDING"
-        },
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ventas-dia",
+      "queryScope": "COLLECTION",
+      "fields": [
         {
           "fieldPath": "fecha",
           "order": "DESCENDING"

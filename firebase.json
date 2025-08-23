@@ -1,6 +1,6 @@
 {
   "firestore": {
-    "rules": "firestore.rules.ventas-dia",
+    "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
