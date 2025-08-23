@@ -1,0 +1,194 @@
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-xxl-11">
+
+      <!-- Header -->
+      <div class="text-center mb-3">
+        <h2 class="fw-bold m-0" style="color: #BAA25C;">
+          <mat-icon class="me-2">table_view</mat-icon>
+          Gestión Contable - Registros
+        </h2>
+        <p class="text-muted mb-0">Listado en tiempo real, con filtros, edición y eliminación</p>
+      </div>
+
+      <!-- Filtros -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <form [formGroup]="filtros" class="row g-3">
+            <div class="col-12 col-md-4">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Búsqueda (observaciones, estado, método)</mat-label>
+                <input matInput placeholder="Escribe para filtrar..." formControlName="texto">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Método de pago</mat-label>
+                <mat-select formControlName="metodoPago">
+                  <mat-option value="">Todos</mat-option>
+                  @for (m of metodosPago; track m.value) {
+                    <mat-option [value]="m.value">
+                      <div class="d-flex align-items-center">
+                        <mat-icon class="me-2">{{ m.icon }}</mat-icon>
+                        <span>{{ m.label }}</span>
+                      </div>
+                    </mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 col-md-2">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Desde</mat-label>
+                <input matInput [matDatepicker]="dp1" formControlName="desde">
+                <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+                <mat-datepicker #dp1></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 col-md-2">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Hasta</mat-label>
+                <input matInput [matDatepicker]="dp2" formControlName="hasta">
+                <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+                <mat-datepicker #dp2></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <div class="col-12 col-md-1 d-grid">
+              <button mat-stroked-button type="button" (click)="limpiarFiltros()" matTooltip="Limpiar filtros">
+                <mat-icon>filter_alt_off</mat-icon>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="small text-muted">
+              {{ dataSource.data.length }} registro(s)
+            </div>
+            <div class="d-flex gap-2">
+              <button mat-stroked-button color="primary" (click)="refrescar()">
+                <mat-icon class="me-1">refresh</mat-icon> Refrescar
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z0 w-100">
+
+              <!-- Fecha -->
+              <ng-container matColumnDef="fechaRegistro">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+                <td mat-cell *matCellDef="let row">
+                  {{ toDate(row.fechaRegistro) | date:'yyyy-MM-dd' }}
+                </td>
+              </ng-container>
+
+              <!-- Valor Ventas -->
+              <ng-container matColumnDef="valorVentas">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Ventas</th>
+                <td mat-cell *matCellDef="let row">
+                  {{ row.valorVentas || 0 | currency:'COP':'symbol':'1.0-0' }}
+                </td>
+              </ng-container>
+
+              <!-- Método Pago -->
+              <ng-container matColumnDef="metodoPago">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Método</th>
+                <td mat-cell *matCellDef="let row">
+                  <mat-icon class="me-1" [matTooltip]="getMetodoPagoLabel(row.metodoPago)">
+                    {{ getMetodoPagoIcon(row.metodoPago) }}
+                  </mat-icon>
+                  {{ getMetodoPagoLabel(row.metodoPago) }}
+                </td>
+              </ng-container>
+
+              <!-- Valor Pago -->
+              <ng-container matColumnDef="valorPago">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Pago</th>
+                <td mat-cell *matCellDef="let row">
+                  {{ row.valorPago || 0 | currency:'COP':'symbol':'1.0-0' }}
+                </td>
+              </ng-container>
+
+              <!-- Gastos -->
+              <ng-container matColumnDef="gastos">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Gastos</th>
+                <td mat-cell *matCellDef="let row">
+                  {{ row.gastos || 0 | currency:'COP':'symbol':'1.0-0' }}
+                </td>
+              </ng-container>
+
+              <!-- Pago Carlos -->
+              <ng-container matColumnDef="pagoDiaCarlos">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Carlos</th>
+                <td mat-cell *matCellDef="let row">
+                  <mat-icon [class]="row.pagoDiaCarlos ? 'text-primary' : 'text-muted'">person</mat-icon>
+                </td>
+              </ng-container>
+
+              <!-- Total -->
+              <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+                <td mat-cell *matCellDef="let row">
+                  <span [class]="row.total >= 0 ? 'text-success' : 'text-danger'">
+                    {{ row.total || (row.valorVentas - (row.gastos || 0) - (row.pagoDiaCarlos ? 60000 : 0)) | currency:'COP':'symbol':'1.0-0' }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Observaciones -->
+              <ng-container matColumnDef="observaciones">
+                <th mat-header-cell *matHeaderCellDef>Observaciones</th>
+                <td mat-cell *matCellDef="let row" class="small text-muted">
+                  <div><strong>Venta:</strong> {{ row.observacionVenta }}</div>
+                  <div><strong>Gasto:</strong> {{ row.observacionGasto }}</div>
+                </td>
+              </ng-container>
+
+              <!-- Estado -->
+              <ng-container matColumnDef="estado">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="badge"
+                        [class]="row.estado === 'activo' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
+                    {{ row.estado || 'N/D' }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef class="text-end">Acciones</th>
+                <td mat-cell *matCellDef="let row" class="text-end">
+                  <button mat-icon-button color="primary" (click)="editar(row)" matTooltip="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="eliminar(row)" matTooltip="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackId"></tr>
+            </table>
+          </div>
+
+          <mat-divider class="my-2"></mat-divider>
+
+          <mat-paginator [pageSizeOptions]="[5,10,25,50]" [pageSize]="10" showFirstLastButtons></mat-paginator>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

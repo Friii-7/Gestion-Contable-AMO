@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { GestionContableComponent } from './components/gestion-contable/gestion-contable.component';
-import { TablaGestionContableComponent } from './components/componente-tabla-gestion-contable/componente-tabla-gestion-contable.component';
+import { TablaGestionContableComponent } from './components/componente-tabla-editar-dialogo/tabla-gestion-contable';
+
 
 
 

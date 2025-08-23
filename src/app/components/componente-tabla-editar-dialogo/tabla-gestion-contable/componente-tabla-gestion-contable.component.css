@@ -1,0 +1,96 @@
+.badge {
+  border-radius: 999px;
+  padding: .25rem .6rem;
+  font-weight: 600;
+}
+
+.bg-success-subtle {
+  background: #e6f4ea;
+}
+
+.bg-secondary-subtle {
+  background: #eee;
+}
+
+.text-success {
+  color: #188038 !important;
+}
+
+.text-danger {
+  color: #c13221 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Additional custom styles for better table appearance */
+.table-responsive {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.mat-mdc-table {
+  width: 100%;
+  min-width: 100%;
+}
+
+/* Ensure table takes full container width */
+.card-body {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+/* Make table columns more spacious */
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  padding: 16px 12px;
+  white-space: nowrap;
+}
+
+/* Ensure the table container uses full width */
+.container-fluid {
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.mat-mdc-header-cell {
+  font-weight: 600;
+  color: #495057;
+}
+
+.mat-mdc-cell {
+  padding: 12px 8px;
+}
+
+/* Card styling */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Form field styling */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Button spacing */
+.gap-2 {
+  gap: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .col-md-1 {
+    margin-top: 1rem;
+  }
+
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+}
