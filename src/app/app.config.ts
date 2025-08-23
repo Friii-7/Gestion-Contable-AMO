@@ -5,23 +5,13 @@ import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
-
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDHmgqraQnB0PrnaaDwjj6HuBjTEm-AAug",
-  authDomain: "contabilidad-artemediooriente.firebaseapp.com",
-  projectId: "contabilidad-artemediooriente",
-  storageBucket: "contabilidad-artemediooriente.firebasestorage.app",
-  messagingSenderId: "860681294783",
-  appId: "1:860681294783:web:760b5f46f5f42503afc70a",
-  measurementId: "G-52FS0GVN6X"
-};
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withHashLocation()),
-    provideFirebaseApp(() => initializeApp(firebaseConfig)),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     provideAnimations()
   ]

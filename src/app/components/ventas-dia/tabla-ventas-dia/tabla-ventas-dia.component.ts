@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit, O
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Firestore, collection, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot } from '@angular/fire/firestore';
+import { Firestore, collection, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, limit } from '@angular/fire/firestore';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -19,6 +19,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 
 import { ExportarReporteComponent } from '../../shared/exportar-reporte';
 import { ReportesService, FiltroReporte, ColumnaReporte } from '../../../services/reportes.service';
+import { environment } from '../../../../environments/environment';
 
 interface VentaDia {
   id?: string;
@@ -117,10 +118,40 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
       nombreProducto: ['', [Validators.required, Validators.minLength(3)]],
       valorProducto: [null, [Validators.required, Validators.min(0)]],
     });
+
+    // Log del environment para debug
+    console.log('Environment config:', {
+      production: environment.production,
+      firebase: environment.firebase
+    });
   }
 
   ngOnInit(): void {
+    this.verificarConexionFirebase();
     this.cargarVentas();
+  }
+
+  private async verificarConexionFirebase(): Promise<void> {
+    try {
+      console.log('Verificando conexión con Firebase...');
+      const ventasRef = collection(this.firestore, 'ventas-dia');
+      const testQuery = query(ventasRef, limit(1));
+
+      const snapshot = await getDocs(testQuery);
+      console.log('Conexión exitosa con Firebase. Colección accesible.');
+
+      // Verificar si hay datos
+      if (snapshot.empty) {
+        console.log('La colección ventas-dia está vacía');
+        this.snackBar.open('La colección de ventas está vacía. Agrega algunas ventas para comenzar.', 'Cerrar', { duration: 4000 });
+      } else {
+        console.log('La colección ventas-dia tiene datos');
+      }
+
+    } catch (error) {
+      console.error('Error de conexión con Firebase:', error);
+      this.snackBar.open(`Error de conexión con Firebase: ${error instanceof Error ? error.message : 'Error desconocido'}`, 'Cerrar', { duration: 5000 });
+    }
   }
 
   ngOnDestroy(): void {
@@ -131,43 +162,65 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
 
     private async cargarVentas(): Promise<void> {
     this._loading.set(true);
+    console.log('Iniciando carga de ventas...');
 
     try {
       const ventasRef = collection(this.firestore, 'ventas-dia');
+      console.log('Referencia a colección creada:', ventasRef);
+
       // Consulta para obtener todas las ventas del día
       const q = query(
         ventasRef,
         orderBy('fecha', 'desc')
       );
+      console.log('Query creada:', q);
 
       this.unsubscribe = onSnapshot(q, (snapshot) => {
+        console.log('Snapshot recibido, documentos:', snapshot.size);
         const ventas: VentaDiaTableItem[] = [];
+
         snapshot.forEach((doc) => {
           const data = doc.data();
-          ventas.push({
-            id: doc.id,
-            fecha: data['fecha'].toDate(),
-            hora: data['hora'],
-            nombreProducto: data['nombreProducto'],
-            valorProducto: data['valorProducto'],
-            tipo: data['tipo'],
-            fechaCreacion: data['fechaCreacion']?.toDate() || new Date(),
-            fechaActualizacion: data['fechaActualizacion']?.toDate() || new Date(),
-          });
+          console.log('Documento procesado:', doc.id, data);
+
+          try {
+            const venta: VentaDiaTableItem = {
+              id: doc.id,
+              fecha: data['fecha']?.toDate() || new Date(),
+              hora: data['hora'] || '',
+              nombreProducto: data['nombreProducto'] || '',
+              valorProducto: data['valorProducto'] || 0,
+              tipo: data['tipo'] || 'venta-dia',
+              fechaCreacion: data['fechaCreacion']?.toDate() || new Date(),
+              fechaActualizacion: data['fechaActualizacion']?.toDate() || new Date(),
+            };
+            ventas.push(venta);
+          } catch (error) {
+            console.error('Error procesando documento:', doc.id, error);
+          }
         });
 
+        console.log('Ventas procesadas:', ventas.length);
         this._ventas.set(ventas);
         this._loading.set(false);
+
+        // Mostrar mensaje de éxito
+        if (ventas.length > 0) {
+          this.snackBar.open(`Se cargaron ${ventas.length} ventas exitosamente`, 'Cerrar', { duration: 2000 });
+        } else {
+          this.snackBar.open('No se encontraron ventas en la base de datos', 'Cerrar', { duration: 3000 });
+        }
+
       }, (error) => {
-        console.error('Error al cargar ventas:', error);
+        console.error('Error en onSnapshot:', error);
         this._loading.set(false);
-        this.snackBar.open('Error al cargar las ventas', 'Cerrar', { duration: 3000 });
+        this.snackBar.open(`Error al cargar las ventas: ${error.message}`, 'Cerrar', { duration: 5000 });
       });
 
     } catch (error) {
       console.error('Error al cargar ventas:', error);
       this._loading.set(false);
-      this.snackBar.open('Error al cargar las ventas', 'Cerrar', { duration: 3000 });
+      this.snackBar.open(`Error al cargar las ventas: ${error instanceof Error ? error.message : 'Error desconocido'}`, 'Cerrar', { duration: 5000 });
     }
   }
 
