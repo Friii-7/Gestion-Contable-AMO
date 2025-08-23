@@ -15,6 +15,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 
 interface GestionContable {
   id?: string;
@@ -22,6 +23,7 @@ interface GestionContable {
   valorVentas: number;
   observacionVenta: string;
   metodoPago: string;
+  valorPago: number;
   gastos: number; // gastos operativos (NO incluye pago de Carlos)
   observacionGasto: string;
   pagoDiaCarlos: boolean;
@@ -48,6 +50,7 @@ interface GestionContable {
     MatDividerModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './gestion-contable.component.html',
@@ -60,6 +63,13 @@ export class GestionContableComponent {
 
   // Constantes
   readonly PAGO_DIARIO_CARLOS = 60_000;
+
+  // Opciones de método de pago
+  readonly METODOS_PAGO = [
+    { value: 'consignacion', label: 'Consignación', icon: 'account_balance' },
+    { value: 'entrega_reza', label: 'Entrega a Reza', icon: 'person' },
+    { value: 'efectivo', label: 'Efectivo', icon: 'money' }
+  ];
 
   // Estado (signals)
   private readonly _isSubmitting = signal(false);
@@ -79,10 +89,45 @@ export class GestionContableComponent {
       fechaRegistro: [new Date(), [Validators.required]],
       valorVentas: [null, [Validators.required, Validators.min(0)]],
       observacionVenta: ['', [Validators.required, Validators.minLength(10)]],
+      metodoPago: ['efectivo', [Validators.required]],
+      valorPago: [null, [Validators.required, Validators.min(0)]],
       gastos: [null, [Validators.required, Validators.min(0)]],
       observacionGasto: ['', [Validators.required, Validators.minLength(10)]],
       pagoDiaCarlos: [false],
+    }, { validators: this.validarValorPago });
+
+    // Listener para actualizar automáticamente el valor del pago
+    this.form.get('metodoPago')?.valueChanges.subscribe(metodo => {
+      if (metodo === 'entrega_reza') {
+        const valorVentas = this.form.get('valorVentas')?.value;
+        if (valorVentas) {
+          this.form.patchValue({ valorPago: valorVentas });
+        }
+      }
     });
+
+    // Listener para validar cuando cambie el valor de ventas
+    this.form.get('valorVentas')?.valueChanges.subscribe(valor => {
+      const metodoPago = this.form.get('metodoPago')?.value;
+      if (metodoPago === 'entrega_reza' && valor) {
+        this.form.patchValue({ valorPago: valor });
+      }
+    });
+  }
+
+  // Validación personalizada para el valor del pago
+  private validarValorPago(group: FormGroup): { [key: string]: any } | null {
+    const metodoPago = group.get('metodoPago')?.value;
+    const valorVentas = group.get('valorVentas')?.value;
+    const valorPago = group.get('valorPago')?.value;
+
+    if (metodoPago === 'entrega_reza' && valorVentas && valorPago) {
+      if (Math.abs(valorVentas - valorPago) > 0.01) { // Tolerancia para decimales
+        return { valorPagoInvalido: true };
+      }
+    }
+
+    return null;
   }
 
   // --- Cálculos ---
@@ -112,7 +157,14 @@ export class GestionContableComponent {
     if (ctrl.errors['required']) return 'Este campo es requerido';
     if (ctrl.errors['min']) return `El valor mínimo es ${ctrl.errors['min'].min}`;
     if (ctrl.errors['minlength']) return `Mínimo ${ctrl.errors['minlength'].requiredLength} caracteres`;
+    if (ctrl.errors['valorPagoInvalido']) return 'El valor del pago debe coincidir con el valor de ventas para "Entrega a Reza"';
     return 'Campo inválido';
+  }
+
+  getMetodoPagoLabel(): string {
+    const metodoSeleccionado = this.form.get('metodoPago')?.value;
+    const metodo = this.METODOS_PAGO.find(m => m.value === metodoSeleccionado);
+    return metodo ? metodo.label : 'No seleccionado';
   }
 
   // --- Acciones ---
@@ -127,7 +179,8 @@ export class GestionContableComponent {
         fechaRegistro: this.form.get('fechaRegistro')?.value,
         valorVentas: Number(this.form.get('valorVentas')?.value) || 0,
         observacionVenta: this.form.get('observacionVenta')?.value,
-        metodoPago: 'efectivo', // Por defecto, se puede cambiar después
+        metodoPago: this.form.get('metodoPago')?.value,
+        valorPago: Number(this.form.get('valorPago')?.value) || 0,
         gastos: Number(this.form.get('gastos')?.value) || 0,
         observacionGasto: this.form.get('observacionGasto')?.value,
         pagoDiaCarlos: this.form.get('pagoDiaCarlos')?.value,
@@ -159,6 +212,8 @@ export class GestionContableComponent {
         fechaRegistro: new Date(),
         valorVentas: null,
         observacionVenta: '',
+        metodoPago: 'efectivo',
+        valorPago: null,
         gastos: null,
         observacionGasto: '',
         pagoDiaCarlos: false,
@@ -179,6 +234,8 @@ export class GestionContableComponent {
       fechaRegistro: new Date(),
       valorVentas: null,
       observacionVenta: '',
+      metodoPago: 'efectivo',
+      valorPago: null,
       gastos: null,
       observacionGasto: '',
       pagoDiaCarlos: false,

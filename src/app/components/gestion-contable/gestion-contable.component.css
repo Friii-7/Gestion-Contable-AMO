@@ -13,19 +13,18 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Contenedor principal */
+/* Estilos generales del formulario */
 .container-fluid {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   min-height: 100vh;
 }
 
-/* Header del formulario */
+/* Header mejorado */
 .display-5 {
-  background: linear-gradient(45deg, var(--primary-color), #42a5f5);
+  background: linear-gradient(45deg, #007bff, #0056b3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .lead {
@@ -33,12 +32,12 @@
   letter-spacing: 0.5px;
 }
 
-/* Tarjeta principal */
+/* Tarjeta principal del formulario */
 mat-card {
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 mat-card:hover {
@@ -48,8 +47,8 @@ mat-card:hover {
 
 /* Header de la tarjeta */
 mat-card-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #42a5f5 100%);
-  padding: 1.5rem;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
 }
 
 mat-card-title {
@@ -65,12 +64,15 @@ mat-card-subtitle {
 
 /* Campos del formulario */
 mat-form-field {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 mat-form-field.mat-form-field-appearance-outline .mat-form-field-outline {
   border-radius: 8px;
-  transition: var(--transition);
+}
+
+mat-form-field.mat-form-field-appearance-outline .mat-form-field-outline-thick {
+  border-width: 2px;
 }
 
 mat-form-field.mat-form-field-appearance-outline:hover .mat-form-field-outline {
@@ -90,23 +92,36 @@ textarea.mat-input-element {
   padding: 0.75rem 0;
 }
 
-/* Select personalizado */
+/* Selector de método de pago */
 mat-select {
-  padding: 0.75rem 0;
+  border-radius: 8px;
 }
 
 .mat-select-value {
   font-size: 1rem;
 }
 
+.mat-option {
+  border-radius: 8px;
+  margin: 4px 0;
+}
+
+.mat-option:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.mat-option.mat-selected {
+  background-color: rgba(25, 118, 210, 0.1);
+  color: var(--primary-color);
+}
+
 /* Checkbox personalizado */
 mat-checkbox {
-  margin: 1rem 0;
+  margin: 16px 0;
 }
 
 mat-checkbox .mat-checkbox-frame {
   border-radius: 4px;
-  border-width: 2px;
 }
 
 mat-checkbox.mat-checkbox-checked .mat-checkbox-background {
@@ -115,29 +130,21 @@ mat-checkbox.mat-checkbox-checked .mat-checkbox-background {
 }
 
 /* Botones */
-button[mat-raised-button] {
+.btn, mat-raised-button, mat-stroked-button {
   border-radius: 8px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0.75rem 2rem;
-  transition: var(--transition);
+  padding: 12px 24px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover, mat-raised-button:hover, mat-stroked-button:hover {
+  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 button[mat-raised-button]:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-}
-
-button[mat-stroked-button] {
-  border-radius: 8px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0.75rem 2rem;
-  transition: var(--transition);
-  border-width: 2px;
 }
 
 button[mat-stroked-button]:hover {
@@ -152,24 +159,29 @@ button[mat-raised-button]:disabled {
   cursor: not-allowed;
 }
 
-/* Resumen de operación */
+/* Tarjetas de resumen */
 .card {
-  border-radius: 8px;
-  transition: var(--transition);
+  border-radius: 12px;
+  transition: all 0.3s ease;
   border: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .card.bg-light {
-  background-color: var(--light-bg) !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
 }
 
 .card.bg-primary {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #42a5f5 100%) !important;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+}
+
+.card.bg-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
 }
 
 /* Iconos */
@@ -193,11 +205,17 @@ mat-icon.text-info {
   color: var(--info-color) !important;
 }
 
+/* Iconos en los campos */
+mat-icon[matSuffix] {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
 /* Mensaje de confirmación */
 .bg-success {
-  background: linear-gradient(135deg, var(--success-color) 0%, #66bb6a 100%) !important;
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
 }
 
 /* Divider personalizado */
@@ -232,6 +250,14 @@ mat-divider {
 
   .d-flex.gap-3 {
     gap: 0.5rem !important;
+  }
+
+  .col-12.col-md-6 {
+    margin-bottom: 16px;
+  }
+
+  .card {
+    margin-bottom: 16px;
   }
 }
 
@@ -284,17 +310,71 @@ mat-error {
   color: var(--primary-color);
 }
 
-/* Estilos para las opciones del select */
-.mat-option {
-  padding: 0.75rem 1rem;
-  transition: var(--transition);
+/* Estilos para el campo de método de pago */
+mat-form-field[formControlName="metodoPago"] .mat-form-field-outline {
+  border-color: #007bff;
 }
 
-.mat-option:hover {
-  background-color: rgba(25, 118, 210, 0.04);
+/* Estilos para el campo de valor de pago */
+mat-form-field[formControlName="valorPago"] .mat-form-field-outline {
+  border-color: #28a745;
 }
 
-.mat-option.mat-selected {
-  background-color: rgba(25, 118, 210, 0.1);
-  color: var(--primary-color);
+/* Mejoras en el resumen */
+.row.text-center.g-3 {
+  margin-top: 24px;
+}
+
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card h4 {
+  font-weight: 700;
+  margin: 8px 0 4px 0;
+}
+
+/* Estilos para el mensaje de confirmación */
+.bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+}
+
+/* Mensajes informativos y de error */
+.alert {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+}
+
+.alert-danger mat-icon {
+  color: #ffebee;
+}
+
+.text-muted small {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+/* Estilos para los mensajes informativos debajo de los campos */
+.text-muted.d-block.mt-1 {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 4px 8px;
+  background-color: rgba(108, 117, 125, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #6c757d;
+}
+
+.text-muted.d-block.mt-1 mat-icon {
+  color: #6c757d;
 }

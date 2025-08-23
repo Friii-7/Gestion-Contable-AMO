@@ -76,6 +76,45 @@
               </mat-form-field>
             </div>
 
+            <!-- Método de Pago -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Método de Pago</mat-label>
+                <mat-select formControlName="metodoPago" required>
+                  @for (metodo of METODOS_PAGO; track metodo.value) {
+                    <mat-option [value]="metodo.value">
+                      <div class="d-flex align-items-center">
+                        <mat-icon class="me-2">{{ metodo.icon }}</mat-icon>
+                        <span>{{ metodo.label }}</span>
+                      </div>
+                    </mat-option>
+                  }
+                </mat-select>
+                <mat-icon matSuffix class="text-primary">payment</mat-icon>
+
+                @if (hasError('metodoPago')) {
+                <mat-error>{{ getErrorMessage('metodoPago') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Valor del Pago -->
+            <div class="col-12 col-md-6">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Valor del Pago</mat-label>
+                <input matInput type="number" formControlName="valorPago" placeholder="0" min="0" required>
+                <mat-icon matSuffix class="text-success">payments</mat-icon>
+
+                @if (hasError('valorPago')) {
+                <mat-error>{{ getErrorMessage('valorPago') }}</mat-error>
+                }
+              </mat-form-field>
+              <small class="text-muted d-block mt-1">
+                <mat-icon class="me-1" style="font-size: 16px; vertical-align: middle;">info</mat-icon>
+                Si selecciona "Entrega a Reza", este valor se actualizará automáticamente con el valor de ventas.
+              </small>
+            </div>
+
             <!-- Gastos operativos (sin incluir pago Carlos) -->
             <div class="col-12 col-md-6">
               <mat-form-field appearance="outline" class="w-100">
@@ -133,6 +172,18 @@
                 <div class="col-12 col-md-3">
                   <div class="card bg-light border-0">
                     <div class="card-body">
+                      <h6 class="card-title text-muted">Valor Pago</h6>
+                      <h4 class="text-primary mb-0">
+                        {{ form.get('valorPago')?.value || 0 | currency:'COP':'symbol':'1.0-0' }}
+                      </h4>
+                      <small class="text-muted">{{ getMetodoPagoLabel() }}</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-3">
+                  <div class="card bg-light border-0">
+                    <div class="card-body">
                       <h6 class="card-title text-muted">Gastos Operativos</h6>
                       <h4 class="text-warning mb-0">
                         {{ getGastosSinCarlos() | currency:'COP':'symbol':'1.0-0' }}
@@ -153,16 +204,29 @@
                   </div>
                 </div>
 
-                <div class="col-12 col-md-3">
+                <div class="col-12">
                   <div class="card bg-primary text-white border-0">
                     <div class="card-body">
                       <h6 class="card-title">Total</h6>
                       <h4 class="mb-0">{{ getTotal() | currency:'COP':'symbol':'1.0-0' }}</h4>
+                      <small class="text-white-50">Ventas - Gastos Totales</small>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            <!-- Mensaje de error general del formulario -->
+            @if (form.errors?.['valorPagoInvalido']) {
+            <div class="col-12">
+              <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <mat-icon class="me-2">error</mat-icon>
+                <div>
+                  <strong>Error de validación:</strong> El valor del pago debe coincidir con el valor de ventas cuando se selecciona "Entrega a Reza".
+                </div>
+              </div>
+            </div>
+            }
 
             <!-- Acciones -->
             <div class="col-12 text-center mt-3">
@@ -202,3 +266,4 @@
     </div>
   </div>
 </div>
+
