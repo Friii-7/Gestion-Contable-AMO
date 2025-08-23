@@ -76,9 +76,18 @@
               {{ dataSource.data.length }} registro(s)
             </div>
             <div class="d-flex gap-2">
-              <button mat-stroked-button color="primary" (click)="refrescar()">
+              <button mat-stroised-button color="primary" (click)="refrescar()">
                 <mat-icon class="me-1">refresh</mat-icon> Refrescar
               </button>
+
+              <!-- Botón de exportación -->
+              <app-exportar-reporte
+                [titulo]="'Reporte de Gestión Contable'"
+                [datos]="dataSource.data"
+                [columnas]="columnasReporte"
+                (exportarPDFEvent)="generarPDF($event)"
+                (exportarExcelEvent)="generarExcel($event)">
+              </app-exportar-reporte>
             </div>
           </div>
 
@@ -170,6 +179,9 @@
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef class="text-end">Acciones</th>
                 <td mat-cell *matCellDef="let row" class="text-end">
+                  <button mat-icon-button color="info" (click)="verDetalle(row)" matTooltip="Ver detalles">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
                   <button mat-icon-button color="primary" (click)="editar(row)" matTooltip="Editar">
                     <mat-icon>edit</mat-icon>
                   </button>

@@ -30,6 +30,8 @@ import { Observable } from 'rxjs';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { EditarGestionContableDialogComponent } from '../editar-gestion-contable/editar-gestion-contable-dialog.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { ExportarReporteComponent } from '../../shared/exportar-reporte';
+import { ReportesService, FiltroReporte, ColumnaReporte } from '../../../services/reportes.service';
 
 
 /** === Interface compartida (misma del formulario) === */
@@ -78,6 +80,9 @@ const METODOS_PAGO = [
     MatDialogModule,
     MatDividerModule,
     MatCheckboxModule,
+
+    // Componentes compartidos
+    ExportarReporteComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './componente-tabla-gestion-contable.component.html',
@@ -87,6 +92,7 @@ export class TablaGestionContableComponent implements OnInit, AfterViewInit {
   private readonly firestore = inject(Firestore);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private readonly reportesService = inject(ReportesService);
 
   metodosPago = METODOS_PAGO;
   displayedColumns: string[] = [
@@ -100,6 +106,20 @@ export class TablaGestionContableComponent implements OnInit, AfterViewInit {
     'observaciones',
     'estado',
     'acciones'
+  ];
+
+  // Columnas para el reporte
+  readonly columnasReporte: ColumnaReporte[] = [
+    { header: 'Fecha', dataKey: 'fechaRegistro', width: 25 },
+    { header: 'Ventas', dataKey: 'valorVentas', width: 20 },
+    { header: 'Método Pago', dataKey: 'metodoPago', width: 25 },
+    { header: 'Pago', dataKey: 'valorPago', width: 20 },
+    { header: 'Gastos', dataKey: 'gastos', width: 20 },
+    { header: 'Pago Carlos', dataKey: 'pagoDiaCarlos', width: 20 },
+    { header: 'Total', dataKey: 'total', width: 20 },
+    { header: 'Observación Venta', dataKey: 'observacionVenta', width: 30 },
+    { header: 'Observación Gasto', dataKey: 'observacionGasto', width: 30 },
+    { header: 'Estado', dataKey: 'estado', width: 20 }
   ];
 
   dataSource = new MatTableDataSource<GestionContable>([]);
@@ -295,6 +315,90 @@ export class TablaGestionContableComponent implements OnInit, AfterViewInit {
       disableClose: true,
     });
     return ref.afterClosed().toPromise();
+  }
+
+  /** === Exportación de Reportes === */
+  generarPDF(filtro?: FiltroReporte | null): void {
+    let datos = this.dataSource.data;
+
+    if (filtro) {
+      datos = this.reportesService.filtrarPorFechas(datos, filtro.fechaInicio, filtro.fechaFin);
+    }
+
+    // Preparar datos para el reporte
+    const datosReporte = datos.map(item => ({
+      ...item,
+      fechaRegistro: this.toDate(item.fechaRegistro)?.toLocaleDateString('es-CO') || 'N/D',
+      metodoPago: this.getMetodoPagoLabel(item.metodoPago),
+      pagoDiaCarlos: item.pagoDiaCarlos ? 'Sí' : 'No',
+      valorVentas: this.formatearMoneda(item.valorVentas),
+      valorPago: this.formatearMoneda(item.valorPago),
+      gastos: this.formatearMoneda(item.gastos),
+      total: this.formatearMoneda(item.total)
+    }));
+
+    this.reportesService.generarPDF(
+      'Reporte de Gestión Contable',
+      datosReporte,
+      this.columnasReporte,
+      filtro || undefined
+    );
+  }
+
+  generarExcel(filtro?: FiltroReporte | null): void {
+    let datos = this.dataSource.data;
+
+    if (filtro) {
+      datos = this.reportesService.filtrarPorFechas(datos, filtro.fechaInicio, filtro.fechaFin);
+    }
+
+    // Preparar datos para el reporte
+    const datosReporte = datos.map(item => ({
+      ...item,
+      fechaRegistro: this.toDate(item.fechaRegistro)?.toLocaleDateString('es-CO') || 'N/D',
+      metodoPago: this.getMetodoPagoLabel(item.metodoPago),
+      pagoDiaCarlos: item.pagoDiaCarlos ? 'Sí' : 'No',
+      valorVentas: this.formatearMoneda(item.valorVentas),
+      valorPago: this.formatearMoneda(item.valorPago),
+      gastos: this.formatearMoneda(item.gastos),
+      total: this.formatearMoneda(item.total)
+    }));
+
+    this.reportesService.generarExcel(
+      'Reporte de Gestión Contable',
+      datosReporte,
+      this.columnasReporte,
+      filtro || undefined
+    );
+  }
+
+  /** === Ver Detalle === */
+  verDetalle(row: GestionContable): void {
+    const mensaje = `
+      Detalles del Registro:
+
+      Fecha: ${this.toDate(row.fechaRegistro)?.toLocaleDateString('es-CO') || 'N/D'}
+      Ventas: ${this.formatearMoneda(row.valorVentas)}
+      Método de Pago: ${this.getMetodoPagoLabel(row.metodoPago)}
+      Pago: ${this.formatearMoneda(row.valorPago)}
+      Gastos: ${this.formatearMoneda(row.gastos)}
+      Pago Carlos: ${row.pagoDiaCarlos ? 'Sí' : 'No'}
+      Total: ${this.formatearMoneda(row.total)}
+      Observación Venta: ${row.observacionVenta}
+      Observación Gasto: ${row.observacionGasto}
+      Estado: ${row.estado}
+    `;
+
+    alert(mensaje);
+  }
+
+  private formatearMoneda(valor: number): string {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(valor || 0);
   }
 }
 

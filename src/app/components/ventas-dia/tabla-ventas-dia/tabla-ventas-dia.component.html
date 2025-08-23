@@ -49,6 +49,15 @@
             <mat-icon class="me-2">list</mat-icon>
             Lista de Ventas
           </mat-card-title>
+          <div class="ms-auto">
+            <app-exportar-reporte
+              [titulo]="'Reporte de Ventas del Día'"
+              [datos]="ventas()"
+              [columnas]="columnasReporte"
+              (exportarPDFEvent)="generarPDF($event)"
+              (exportarExcelEvent)="generarExcel($event)">
+            </app-exportar-reporte>
+          </div>
         </mat-card-header>
 
         <mat-card-content class="p-0">
@@ -97,6 +106,11 @@
                   <th mat-header-cell *matHeaderCellDef> Acciones </th>
                   <td mat-cell *matCellDef="let venta">
                     <div class="d-flex gap-2">
+                      <button mat-icon-button color="info"
+                              (click)="verDetalleVenta(venta)"
+                              matTooltip="Ver detalles">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
                       <button mat-icon-button color="primary"
                               (click)="editarVenta(venta)"
                               matTooltip="Editar venta">

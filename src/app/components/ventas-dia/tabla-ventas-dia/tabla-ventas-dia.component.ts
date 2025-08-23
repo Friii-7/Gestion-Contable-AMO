@@ -17,6 +17,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, Sort } from '@angular/material/sort';
 
+import { ExportarReporteComponent } from '../../shared/exportar-reporte';
+import { ReportesService, FiltroReporte, ColumnaReporte } from '../../../services/reportes.service';
+
 interface VentaDia {
   id?: string;
   fecha: Date;
@@ -52,7 +55,10 @@ interface VentaDiaTableItem extends VentaDia {
     MatDialogModule,
     MatTooltipModule,
     MatPaginatorModule,
-    MatSortModule
+    MatSortModule,
+
+    // Componentes compartidos
+    ExportarReporteComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tabla-ventas-dia.component.html',
@@ -62,6 +68,7 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
   private readonly firestore = inject(Firestore);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private readonly reportesService = inject(ReportesService);
 
   // Estado (signals)
   private readonly _ventas = signal<VentaDiaTableItem[]>([]);
@@ -83,6 +90,14 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
 
   // Columnas de la tabla
   readonly displayedColumns = ['fecha', 'hora', 'nombreProducto', 'valorProducto', 'acciones'];
+
+  // Columnas para el reporte
+  readonly columnasReporte: ColumnaReporte[] = [
+    { header: 'Fecha', dataKey: 'fecha', width: 25 },
+    { header: 'Hora', dataKey: 'hora', width: 20 },
+    { header: 'Producto', dataKey: 'nombreProducto', width: 40 },
+    { header: 'Valor', dataKey: 'valorProducto', width: 25 }
+  ];
 
   // Formulario de edición
   readonly editForm: FormGroup;
@@ -239,5 +254,66 @@ export class TablaVentasDiaComponent implements OnInit, OnDestroy {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(valor);
+  }
+
+  /** === Exportación de Reportes === */
+  generarPDF(filtro?: FiltroReporte | null): void {
+    let datos = this.ventas();
+
+    if (filtro) {
+      datos = this.reportesService.filtrarPorFechas(datos, filtro.fechaInicio, filtro.fechaFin);
+    }
+
+    // Preparar datos para el reporte
+    const datosReporte = datos.map(item => ({
+      ...item,
+      fecha: this.formatearFecha(item.fecha),
+      valorProducto: this.formatearValor(item.valorProducto)
+    }));
+
+    this.reportesService.generarPDF(
+      'Reporte de Ventas del Día',
+      datosReporte,
+      this.columnasReporte,
+      filtro || undefined
+    );
+  }
+
+  generarExcel(filtro?: FiltroReporte | null): void {
+    let datos = this.ventas();
+
+    if (filtro) {
+      datos = this.reportesService.filtrarPorFechas(datos, filtro.fechaInicio, filtro.fechaFin);
+    }
+
+    // Preparar datos para el reporte
+    const datosReporte = datos.map(item => ({
+      ...item,
+      fecha: this.formatearFecha(item.fecha),
+      valorProducto: this.formatearValor(item.valorProducto)
+    }));
+
+    this.reportesService.generarExcel(
+      'Reporte de Ventas del Día',
+      datosReporte,
+      this.columnasReporte,
+      filtro || undefined
+    );
+  }
+
+  /** === Ver Detalle de Venta === */
+  verDetalleVenta(venta: VentaDiaTableItem): void {
+    const mensaje = `
+      Detalles de la Venta:
+
+      Fecha: ${this.formatearFecha(venta.fecha)}
+      Hora: ${venta.hora}
+      Producto: ${venta.nombreProducto}
+      Valor: ${this.formatearValor(venta.valorProducto)}
+      Fecha de Creación: ${venta.fechaCreacion.toLocaleDateString('es-CO')}
+      Última Actualización: ${venta.fechaActualizacion.toLocaleDateString('es-CO')}
+    `;
+
+    alert(mensaje);
   }
 }
